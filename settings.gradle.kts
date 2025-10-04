@@ -1,4 +1,4 @@
-rootProject.name = "LazyPizzaCMP"
+rootProject.name = "LazyPizza"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {

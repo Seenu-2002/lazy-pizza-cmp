@@ -1,38 +1,44 @@
 package com.seenu.dev.android.lazypizza.presentation.theme
 
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 val LightColorTheme = lightColorScheme(
     primary = Primary,
-    background = background,
+    background = Background,
     onPrimary = TextOnPrimary,
     outline = Outline,
+    primaryContainer = Background
 )
 
-val MaterialTheme.textPrimary
+val ColorScheme.textPrimary
     get() = TextPrimary
 
-val MaterialTheme.textSecondary
+val ColorScheme.textSecondary
     get() = TextSecondary
 
-val MaterialTheme.textSecondary8
+val ColorScheme.textSecondary8
     get() = TextSecondary8
 
-val MaterialTheme.surfaceHighest
+val ColorScheme.surfaceHigher: Color
+    get() = SurfaceHigher
+
+val ColorScheme.surfaceHighest
     get() = SurfaceHighest
 
-val MaterialTheme.outline50
+val ColorScheme.outline50
     get() = Outline50
 
-val MaterialTheme.primaryGradientStart
+val ColorScheme.primaryGradientStart
     get() = PrimaryGradientStart
 
-val MaterialTheme.primaryGradientEnd
+val ColorScheme.primaryGradientEnd
     get() = PrimaryGradientEnd
 
-val MaterialTheme.primary8
+val ColorScheme.primary8
     get() = Primary8
 
 @Composable

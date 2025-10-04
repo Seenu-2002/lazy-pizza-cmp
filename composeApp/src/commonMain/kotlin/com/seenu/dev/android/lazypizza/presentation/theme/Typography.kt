@@ -6,11 +6,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import lazypizzacmp.composeapp.generated.resources.Res
-import lazypizzacmp.composeapp.generated.resources.instrument_sans_bold
-import lazypizzacmp.composeapp.generated.resources.instrument_sans_medium
-import lazypizzacmp.composeapp.generated.resources.instrument_sans_regular
-import lazypizzacmp.composeapp.generated.resources.instrument_sans_semibold
+import lazypizza.composeapp.generated.resources.Res
+import lazypizza.composeapp.generated.resources.instrument_sans_bold
+import lazypizza.composeapp.generated.resources.instrument_sans_medium
+import lazypizza.composeapp.generated.resources.instrument_sans_regular
+import lazypizza.composeapp.generated.resources.instrument_sans_semibold
 import org.jetbrains.compose.resources.Font
 
 val InstrumentSans: FontFamily
