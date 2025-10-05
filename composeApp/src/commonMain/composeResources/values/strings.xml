@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">LazyPizza</string>
     <string name="count_and_price">%1$s x %2$s</string>
     <string name="add_to_cart">Add to Cart</string>
+    <string name="search_placeholder">Search for delicious food...</string>
+    <string name="pizza">Pizza</string>
+    <string name="drinks">Drinks</string>
+    <string name="sauces">Sauces</string>
+    <string name="ice_cream">Ice Cream</string>
 </resources>

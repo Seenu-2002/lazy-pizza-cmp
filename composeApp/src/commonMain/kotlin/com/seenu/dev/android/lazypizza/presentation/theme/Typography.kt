@@ -60,7 +60,7 @@ val Typography.title3
         lineHeight = 22.sp
     )
 
-val Typography.label2
+val Typography.label2Semibold
     @Composable get() = TextStyle(
         fontFamily = InstrumentSans,
         fontWeight = FontWeight.SemiBold,
@@ -96,6 +96,14 @@ val Typography.body3Medium
     @Composable get() = TextStyle(
         fontFamily = InstrumentSans,
         fontWeight = FontWeight.Medium,
+        fontSize = 14.sp,
+        lineHeight = 18.sp
+    )
+
+val Typography.body3Bold
+    @Composable get() = TextStyle(
+        fontFamily = InstrumentSans,
+        fontWeight = FontWeight.Bold,
         fontSize = 14.sp,
         lineHeight = 18.sp
     )

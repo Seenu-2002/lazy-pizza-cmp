@@ -65,7 +65,7 @@ fun ItemCounter(
             Icon(
                 modifier = Modifier.size(14.dp),
                 painter = painterResource(Res.drawable.ic_minus),
-                contentDescription = "Remove $name topping",
+                contentDescription = "Remove $name to cart",
                 tint = MaterialTheme.colorScheme.textSecondary
             )
         }
@@ -78,7 +78,7 @@ fun ItemCounter(
             Icon(
                 modifier = Modifier.size(14.dp),
                 painter = painterResource(Res.drawable.ic_plus),
-                contentDescription = "Add $name topping",
+                contentDescription = "Add $name to cart",
                 tint = MaterialTheme.colorScheme.textSecondary
             )
         }
