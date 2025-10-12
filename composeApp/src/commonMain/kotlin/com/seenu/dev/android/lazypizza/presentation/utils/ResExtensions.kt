@@ -1,6 +1,6 @@
 package com.seenu.dev.android.lazypizza.presentation.utils
 
-import com.seenu.dev.android.lazypizza.presentation.state.FoodType
+import com.seenu.dev.android.lazypizza.domain.model.FoodType
 import lazypizza.composeapp.generated.resources.Res
 import lazypizza.composeapp.generated.resources.drinks
 import lazypizza.composeapp.generated.resources.ice_cream

@@ -6,18 +6,27 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import co.touchlab.kermit.Logger.Companion.i
 import com.seenu.dev.android.lazypizza.presentation.theme.outline50
+import com.seenu.dev.android.lazypizza.presentation.theme.textPrimary
+import kotlinx.serialization.json.JsonNull.content
 
 @Composable
 fun LazyPizzaIconButton(
@@ -25,8 +34,11 @@ fun LazyPizzaIconButton(
     enabled: Boolean = true,
     modifier: Modifier = Modifier,
     shape: Shape = MaterialTheme.shapes.small,
-    content: @Composable BoxScope.() -> Unit = {}
+    content: @Composable () -> Unit = {}
 ) {
+    val colors = IconButtonDefaults.iconButtonColors(
+        disabledContentColor = MaterialTheme.colorScheme.textPrimary.copy(0.38F)
+    )
     Box(
         modifier = modifier
             .clip(shape)
@@ -44,7 +56,12 @@ fun LazyPizzaIconButton(
                     bounded = false,
                 )
             ),
-        contentAlignment = Alignment.Center,
-        content = content
-    )
+        contentAlignment = Alignment.Center
+    ) {
+        val contentColor = if (enabled) {
+            colors.contentColor
+        } else colors.disabledContentColor
+
+        CompositionLocalProvider(LocalContentColor provides contentColor, content = content)
+    }
 }

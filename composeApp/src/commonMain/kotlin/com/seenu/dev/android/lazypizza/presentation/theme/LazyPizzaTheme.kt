@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.seenu.dev.android.lazypizza.LazyPizzaCompositionLocals
 
 val LightColorTheme = lightColorScheme(
     primary = Primary,
@@ -43,9 +44,11 @@ val ColorScheme.primary8
 
 @Composable
 fun LazyPizzaTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
-        colorScheme = LightColorTheme,
-        typography = LazyPizzaTypography,
-        content = content
-    )
+    LazyPizzaCompositionLocals {
+        MaterialTheme(
+            colorScheme = LightColorTheme,
+            typography = LazyPizzaTypography,
+            content = content
+        )
+    }
 }

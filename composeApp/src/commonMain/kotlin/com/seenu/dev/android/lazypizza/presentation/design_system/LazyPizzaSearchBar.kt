@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +22,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.unit.DpOffset
@@ -29,7 +33,9 @@ import com.seenu.dev.android.lazypizza.presentation.theme.LazyPizzaTheme
 import com.seenu.dev.android.lazypizza.presentation.theme.body1Regular
 import com.seenu.dev.android.lazypizza.presentation.theme.surfaceHigher
 import com.seenu.dev.android.lazypizza.presentation.theme.surfaceHighest
+import com.seenu.dev.android.lazypizza.presentation.theme.textPrimary
 import lazypizza.composeapp.generated.resources.Res
+import lazypizza.composeapp.generated.resources.ic_clear
 import lazypizza.composeapp.generated.resources.ic_search
 import lazypizza.composeapp.generated.resources.search_placeholder
 import org.jetbrains.compose.resources.painterResource
@@ -50,12 +56,16 @@ fun LazyPizzaSearchBarPreview() {
     }
 }
 
+// TODO: Add dropShadow to the search bar
 @Composable
 fun LazyPizzaSearchBar(
     modifier: Modifier = Modifier,
     text: String,
-    onTextChange: (String) -> Unit
+    onTextChange: (String) -> Unit,
+    focusRequester: FocusRequester = remember { FocusRequester() },
+    onClose: () -> Unit = {}
 ) {
+    var hasFocus by remember { mutableStateOf(false) }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -84,7 +94,11 @@ fun LazyPizzaSearchBar(
         Spacer(modifier = Modifier.size(8.dp))
         BasicTextField(
             modifier = Modifier
-                .weight(1F),
+                .weight(1F)
+                .focusRequester(focusRequester)
+                .onFocusChanged {
+                    hasFocus = it.isFocused
+                },
             value = text,
             onValueChange = onTextChange,
             singleLine = true,
@@ -107,5 +121,16 @@ fun LazyPizzaSearchBar(
                 }
             }
         )
+//        if (text.isNotEmpty() || hasFocus) {
+//            Spacer(modifier = Modifier.size(8.dp))
+//            IconButton(onClick = onClose) {
+//                Icon(
+//                    painter = painterResource(Res.drawable.ic_clear),
+//                    contentDescription = "Clear Search",
+//                    tint = MaterialTheme.colorScheme.textPrimary,
+//                    modifier = Modifier.size(20.dp)
+//                )
+//            }
+//        }
     }
 }

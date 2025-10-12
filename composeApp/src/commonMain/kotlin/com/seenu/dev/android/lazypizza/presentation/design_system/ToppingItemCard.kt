@@ -4,11 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -32,18 +29,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.seenu.dev.android.lazypizza.presentation.state.ToppingItemUiModel
+import com.seenu.dev.android.lazypizza.LocalCurrencyFormatter
+import com.seenu.dev.android.lazypizza.presentation.state.ToppingUiModel
 import com.seenu.dev.android.lazypizza.presentation.theme.LazyPizzaTheme
 import com.seenu.dev.android.lazypizza.presentation.theme.body3Regular
-import com.seenu.dev.android.lazypizza.presentation.theme.outline50
 import com.seenu.dev.android.lazypizza.presentation.theme.primary8
-import com.seenu.dev.android.lazypizza.presentation.theme.textSecondary
 import com.seenu.dev.android.lazypizza.presentation.theme.title2
-import lazypizza.composeapp.generated.resources.Res
-import lazypizza.composeapp.generated.resources.ic_minus
-import lazypizza.composeapp.generated.resources.ic_plus
-import lazypizza.composeapp.generated.resources.instrument_sans_bold
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
@@ -52,11 +43,11 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 private fun ToppingItemCardPreviewWithCounter() {
     LazyPizzaTheme {
         ToppingItemCard(
-            data = ToppingItemUiModel(
+            data = ToppingUiModel(
                 id = 1L,
                 name = "Extra Cheese",
-                prize = 1.5,
-                prizeLabel = "$1.5"
+                price = 1.5,
+                imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/chilli_wm4ain.png"
             ),
             count = 2,
             onClick = {},
@@ -74,11 +65,11 @@ private fun ToppingItemCardPreview() {
     }
     LazyPizzaTheme {
         ToppingItemCard(
-            data = ToppingItemUiModel(
+            data = ToppingUiModel(
                 id = 1L,
                 name = "Extra Cheese",
-                prize = 1.5,
-                prizeLabel = "$1.5"
+                price = 1.5,
+                imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/chilli_wm4ain.png"
             ),
             count = count,
             onClick = {
@@ -97,7 +88,7 @@ private fun ToppingItemCardPreview() {
 @Composable
 fun ToppingItemCard(
     modifier: Modifier = Modifier,
-    data: ToppingItemUiModel,
+    data: ToppingUiModel,
     count: Int,
     onClick: () -> Unit,
     onAdd: () -> Unit,
@@ -149,6 +140,7 @@ fun ToppingItemCard(
                     .fillMaxWidth(),
                 count = count,
                 name = data.name,
+                max = 3,
                 onAdd = onAdd,
                 onRemove = onRemove
             )
@@ -157,8 +149,9 @@ fun ToppingItemCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                val currencyFormatter = LocalCurrencyFormatter.current
                 Text(
-                    text = data.prizeLabel,
+                    text = currencyFormatter.format(data.price),
                     style = MaterialTheme.typography.title2
                 )
             }

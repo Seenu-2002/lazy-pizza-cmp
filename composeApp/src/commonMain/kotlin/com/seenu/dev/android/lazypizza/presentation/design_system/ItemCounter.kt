@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -30,7 +31,6 @@ import lazypizza.composeapp.generated.resources.instrument_sans_bold
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-
 @Preview
 @Composable
 private fun ItemCounterPreview() {
@@ -39,6 +39,7 @@ private fun ItemCounterPreview() {
             count = 2,
             name = "Extra Cheese",
             onAdd = {},
+            max = 3,
             onRemove = {}
         )
     }
@@ -49,6 +50,7 @@ fun ItemCounter(
     modifier: Modifier = Modifier,
     count: Int,
     name: String,
+    max: Int,
     onAdd: () -> Unit,
     onRemove: () -> Unit
 ) {
@@ -66,7 +68,7 @@ fun ItemCounter(
                 modifier = Modifier.size(14.dp),
                 painter = painterResource(Res.drawable.ic_minus),
                 contentDescription = "Remove $name to cart",
-                tint = MaterialTheme.colorScheme.textSecondary
+                tint = LocalContentColor.current
             )
         }
         Text(text = "$count", style = MaterialTheme.typography.title2)
@@ -74,12 +76,13 @@ fun ItemCounter(
             onClick = onAdd,
             modifier = Modifier
                 .size(22.dp),
+            enabled = count < max
         ) {
             Icon(
                 modifier = Modifier.size(14.dp),
                 painter = painterResource(Res.drawable.ic_plus),
                 contentDescription = "Add $name to cart",
-                tint = MaterialTheme.colorScheme.textSecondary
+                tint = LocalContentColor.current
             )
         }
     }

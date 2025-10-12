@@ -2,83 +2,146 @@ package com.seenu.dev.android.lazypizza.presentation.pizza_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.seenu.dev.android.lazypizza.presentation.state.FoodItemUiModel
+import co.touchlab.kermit.Logger
+import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaRepository
+import com.seenu.dev.android.lazypizza.domain.model.FoodType
+import com.seenu.dev.android.lazypizza.presentation.mappers.toUiModel
 import com.seenu.dev.android.lazypizza.presentation.state.FoodSection
-import com.seenu.dev.android.lazypizza.presentation.state.FoodType
 import com.seenu.dev.android.lazypizza.presentation.state.UiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.random.Random
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
-class PizzaListViewModel : ViewModel() {
+class PizzaListViewModel constructor(
+    private val repository: LazyPizzaRepository
+) : ViewModel() {
 
-    private val _items: MutableStateFlow<UiState<List<FoodSection>>> =
+    private var items: List<FoodSection> = emptyList()
+
+    private val _filteredItems: MutableStateFlow<UiState<FoodListUiState>> =
         MutableStateFlow(UiState.Empty())
-    val items: StateFlow<UiState<List<FoodSection>>> = _items.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            delay(2000)
-            val mockSections = generateMockFoodSections()
-            _items.value = UiState.Success(mockSections)
-        }
-    }
-
-}
-
-@OptIn(ExperimentalTime::class)
-fun generateMockFoodSections(): List<FoodSection> {
-    val random = Random(Clock.System.now().toEpochMilliseconds())
-
-    fun randomIngredients(): String {
-        val ingredients = listOf(
-            "Cheese", "Tomato", "Basil", "Pepperoni", "Onion",
-            "Olives", "Mushrooms", "Bacon", "Garlic", "Pineapple"
+    val filteredItems: StateFlow<UiState<FoodListUiState>> by lazy {
+        _filteredItems.onStart {
+            viewModelScope.launch {
+                getFoodItems()
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = UiState.Empty()
         )
-        return List(random.nextInt(2, 5)) { ingredients.random(random) }
-            .joinToString(", ")
     }
 
-    fun randomPrice(type: FoodType): Double = when (type) {
-        FoodType.PIZZA -> random.nextDouble(6.0, 15.0)
-        FoodType.DRINK -> random.nextDouble(1.5, 5.0)
-        FoodType.SAUCE -> random.nextDouble(0.5, 2.0)
-        FoodType.ICE_CREAM -> random.nextDouble(2.0, 6.0)
-    }
+    fun handleEvent(event: PizzaListEvent) {
+        when (event) {
+            is PizzaListEvent.UpdateCountInCart -> {
+                updateCountInCard(event.itemId, event.count)
+            }
 
-    fun generateItems(type: FoodType): List<FoodItemUiModel> {
-        val count = random.nextInt(5, 21)
-        return List(count) { index ->
-            FoodItemUiModel(
-                id = "${type.name}_$index".hashCode().toLong(),
-                name = when (type) {
-                    FoodType.PIZZA -> listOf("Margherita", "Pepperoni", "Veggie", "BBQ Chicken", "Hawaiian").random(random)
-                    FoodType.DRINK -> listOf("Coke", "Sprite", "Fanta", "Iced Tea", "Lemonade").random(random)
-                    FoodType.SAUCE -> listOf("Ketchup", "Mayo", "Garlic Dip", "BBQ", "Mustard").random(random)
-                    FoodType.ICE_CREAM -> listOf("Vanilla", "Chocolate", "Strawberry", "Mango", "Mint").random(random)
-                },
-                type = type,
-                ingredients = randomIngredients(),
-                prize = randomPrice(type).let { (it * 100).toInt() / 100.0 }, // Round to 2 decimal places
-                countInCart = 0
-            )
+            is PizzaListEvent.Search -> {
+                updateSearchQuery(event.query)
+            }
         }
     }
 
-    return FoodType.entries.map { type ->
-        FoodSection(type = type, items = generateItems(type))
+    private fun getFoodItems() {
+        viewModelScope.launch {
+            _filteredItems.value = UiState.Loading()
+            items = emptyList()
+            try {
+                delay((100..500L).random())
+                val sections = repository.getFoodItems()
+                    .groupBy { it.type }
+                    .map {
+                        FoodSection(
+                            type = it.key,
+                            items = it.value.map { item ->
+                                item.toUiModel()
+                            }
+                        )
+                    }.sortedBy { it.type.ordinal }
+
+                items = sections
+                val filters = sections.map { it.type }
+                _filteredItems.value = UiState.Success(
+                    FoodListUiState(
+                        sections = sections,
+                        filters = filters
+                    )
+                )
+            } catch (exp: Exception) {
+                Logger.e("Error fetching food items: ${exp.message}", exp)
+                _filteredItems.value =
+                    UiState.Error("Error fetching food items: ${exp.message}", exception = exp)
+            }
+        }
     }
+
+    private fun updateCountInCard(itemId: Long, count: Int) {
+        viewModelScope.launch {
+            val newSections = mutableListOf<FoodSection>()
+            val items = (filteredItems.value as? UiState.Success)?.data?.sections
+                ?: return@launch
+            var isItemFound = false
+            for (section in items) {
+                if (isItemFound) {
+                    newSections.add(section.copy())
+                } else {
+
+                    val item = section.items.find { it.id == itemId }
+                    if (item != null) {
+                        isItemFound = true
+                        val newItem = item.copy(countInCart = count)
+                        val newItems = section.items.map {
+                            if (item.id == it.id) newItem else it
+                        }
+                        newSections.add(section.copy(items = newItems))
+                    } else {
+                        newSections.add(section.copy())
+                    }
+                }
+            }
+
+            (_filteredItems.value as? UiState.Success)?.data?.let { state ->
+                val newState =
+                    state.copy(sections = newSections, filters = newSections.map { it.type })
+                _filteredItems.value = UiState.Success(newState)
+            } ?: Logger.e("Previous state is not Success. Instead found: ${filteredItems.value}")
+        }
+    }
+
+    private fun updateSearchQuery(query: String) {
+        val newSections = if (query.isBlank()) {
+            items
+        } else {
+            items.map { section ->
+                val filteredItems =
+                    section.items.filter { it.name.contains(query, ignoreCase = true) }
+                section.copy(items = filteredItems)
+            }.filter { it.items.isNotEmpty() }
+        }
+        val filters = newSections.map { it.type }
+        val newState = FoodListUiState(
+            sections = newSections,
+            filters = filters,
+            search = query
+        )
+        _filteredItems.value = UiState.Success(newState)
+    }
+
 }
 
+sealed interface PizzaListEvent {
+    data class UpdateCountInCart(val itemId: Long, val count: Int) : PizzaListEvent
+    data class Search(val query: String) : PizzaListEvent
+}
 
-
-
-
-
-
+data class FoodListUiState(
+    val sections: List<FoodSection> = emptyList(),
+    val filters: List<FoodType> = emptyList(),
+    val search: String = ""
+)

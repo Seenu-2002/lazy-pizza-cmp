@@ -34,6 +34,9 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.splash.screen)
             implementation(compose.material3)
+
+            // Ktor
+            implementation(libs.ktor.client.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -58,6 +61,22 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.compose.navigation)
             api(libs.koin.annotations)
+
+            // Kermit
+            implementation(libs.kermit.logger)
+
+            // Coil
+            implementation(libs.coil.compose)
+            implementation(libs.coil.compose.core)
+            implementation(libs.coil.network.ktor)
+            implementation(libs.coil.mp)
+
+            // Ktor
+            implementation(libs.ktor.client.core)
+        }
+        appleMain.dependencies {
+            // Ktor
+            implementation(libs.ktor.client.darwin)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

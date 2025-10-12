@@ -13,6 +13,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.compose.setSingletonImageLoaderFactory
+import coil3.memory.MemoryCache
+import coil3.request.CachePolicy
+import coil3.request.crossfade
+import coil3.util.DebugLogger
+import com.seenu.dev.android.lazypizza.core.formatter.CurrencyFormatter
 import com.seenu.dev.android.lazypizza.presentation.navigation.Route
 import com.seenu.dev.android.lazypizza.presentation.pizza_list.PizzaListScreen
 import com.seenu.dev.android.lazypizza.presentation.theme.LazyPizzaTheme
@@ -22,6 +30,9 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Preview
 fun App() {
     LazyPizzaTheme {
+        setSingletonImageLoaderFactory { context ->
+            getAsyncImageLoader(context)
+        }
         val navController = rememberNavController()
 
         NavHost(
@@ -41,3 +52,15 @@ fun App() {
         }
     }
 }
+
+fun getAsyncImageLoader(context: PlatformContext) = ImageLoader.Builder(context)
+    .memoryCachePolicy(CachePolicy.ENABLED)
+    .memoryCache {
+        MemoryCache.Builder()
+            .maxSizePercent(context, 0.3)
+            .strongReferencesEnabled(true)
+            .build()
+    }
+    .logger(DebugLogger())
+    .crossfade(true)
+    .build()

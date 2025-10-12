@@ -3,6 +3,7 @@ package com.seenu.dev.android.lazypizza.presentation.design_system
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -21,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,10 +31,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.key.Key.Companion.R
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
+import com.seenu.dev.android.lazypizza.LocalCurrencyFormatter
+import com.seenu.dev.android.lazypizza.domain.model.FoodType
 import com.seenu.dev.android.lazypizza.presentation.state.FoodItemUiModel
-import com.seenu.dev.android.lazypizza.presentation.state.FoodType
 import com.seenu.dev.android.lazypizza.presentation.theme.LazyPizzaTheme
 import com.seenu.dev.android.lazypizza.presentation.theme.body1Medium
 import com.seenu.dev.android.lazypizza.presentation.theme.body3Regular
@@ -62,7 +70,8 @@ fun FoodPreviewItemCardWithCountPreview() {
                     name = "Veggie Delight",
                     type = FoodType.PIZZA,
                     ingredients = "Tomato, Lettuce, Olives, Bell Peppers",
-                    prize = 9.99,
+                    price = 9.99,
+                    imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/Pepperoni_ety6cd.png",
                     countInCart = 4
                 )
             )
@@ -93,7 +102,8 @@ fun FoodPreviewItemCardPreview() {
             name = "Veggie Delight",
             type = FoodType.PIZZA,
             ingredients = "Tomato, Lettuce, Olives, Bell Peppers",
-            prize = 9.99,
+            imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/Pepperoni_ety6cd.png",
+            price = 9.99,
         )
         FoodPreviewItemCard(data = data)
     }
@@ -108,9 +118,10 @@ fun FoodPreviewItemCardWithCardPreview() {
             name = "Mineral Water",
             type = FoodType.DRINK,
             ingredients = null,
-            prize = 9.99,
+            imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/Pepperoni_ety6cd.png",
+            price = 9.99,
         )
-        FoodPreviewItemCard(data = data, showAddToCard = true)
+        FoodPreviewItemCard(data = data, showAddToCart = true)
     }
 }
 
@@ -118,7 +129,8 @@ fun FoodPreviewItemCardWithCardPreview() {
 fun FoodPreviewItemCard(
     data: FoodItemUiModel,
     modifier: Modifier = Modifier,
-    showAddToCard: Boolean = false,
+    showAddToCart: Boolean = false,
+    maxCountCanBeAdded: Int = 3,
     onClick: () -> Unit = {},
     onAdd: () -> Unit = {},
     onRemove: () -> Unit = {},
@@ -126,6 +138,7 @@ fun FoodPreviewItemCard(
 ) {
     val isItemAddedToCard = data.countInCart > 0
     val shape = MaterialTheme.shapes.medium
+    val currencyFormatter = LocalCurrencyFormatter.current
     Row(
         modifier = modifier.fillMaxWidth()
             .height(IntrinsicSize.Max)
@@ -134,7 +147,7 @@ fun FoodPreviewItemCard(
                 shape = shape,
                 color = MaterialTheme.colorScheme.surfaceHigher
             ).clickable(
-                enabled = !isItemAddedToCard,
+                enabled = !isItemAddedToCard && !showAddToCart,
                 onClick = onClick
             ),
         verticalAlignment = Alignment.CenterVertically
@@ -149,7 +162,13 @@ fun FoodPreviewItemCard(
                     color = MaterialTheme.colorScheme.surfaceHighest
                 )
         ) {
-            Box(modifier = Modifier.size(108.dp).padding(4.dp))
+            SubcomposeAsyncImage(
+                model = data.imageUrl,
+                contentDescription = data.name,
+                modifier = Modifier
+                    .size(108.dp)
+                    .padding(4.dp)
+            )
         }
 
         Column(
@@ -194,31 +213,39 @@ fun FoodPreviewItemCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (!isItemAddedToCard) {
-                    val prizeLabel = "$${data.prize}" // TODO: Currency formatting
+                    val prizeLabel = currencyFormatter.format(data.price)
                     Text(
                         text = prizeLabel,
                         style = MaterialTheme.typography.title1SemiBold,
                         modifier = Modifier.weight(1F)
                     )
 
-                    if (showAddToCard) {
-                        TextButton(
-                            onClick = {
-
-                            }, modifier = Modifier.border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.primary8,
-                                shape = CircleShape
-                            ),
-                            shape = CircleShape,
-                            contentPadding = PaddingValues(
-                                horizontal = 24.dp,
-                                vertical = 8.dp
-                            )
+                    if (showAddToCart) {
+                        Box(
+                            modifier = Modifier
+                                .semantics {
+                                    role = Role.Button
+                                }
+                                .clip(CircleShape)
+                                .border(
+                                    width = 1.dp,
+                                    color = MaterialTheme.colorScheme.primary8,
+                                    shape = CircleShape
+                                )
+                                .clickable(
+                                    onClick = onAdd,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = ripple(
+                                        bounded = true,
+                                        color = MaterialTheme.colorScheme.primary8
+                                    )
+                                )
+                                .padding(vertical = 9.dp, horizontal = 24.dp),
                         ) {
                             Text(
                                 text = stringResource(Res.string.add_to_cart),
-                                style = MaterialTheme.typography.title3
+                                style = MaterialTheme.typography.title3,
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
@@ -227,12 +254,13 @@ fun FoodPreviewItemCard(
                         modifier = Modifier.width(100.dp),
                         count = data.countInCart,
                         name = data.name,
+                        max = maxCountCanBeAdded,
                         onAdd = onAdd,
                         onRemove = onRemove
                     )
 
                     Spacer(modifier = Modifier.weight(1F))
-                    val total = "$${data.countInCart * data.prize}" // TODO: Currency formatting
+                    val total = currencyFormatter.format(data.countInCart * data.price)
                     Column(modifier = Modifier, horizontalAlignment = Alignment.End) {
                         Text(
                             text = total,
@@ -242,7 +270,7 @@ fun FoodPreviewItemCard(
                             text = stringResource(
                                 Res.string.count_and_price,
                                 data.countInCart,
-                                data.prize
+                                data.price
                             ),
                             style = MaterialTheme.typography.body4Regular
                         )

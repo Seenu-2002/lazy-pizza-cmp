@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -23,7 +25,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,9 +36,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.seenu.dev.android.lazypizza.di.LazyPizzaModule
+import com.seenu.dev.android.lazypizza.domain.model.FoodType
 import com.seenu.dev.android.lazypizza.presentation.design_system.FoodFilterChip
 import com.seenu.dev.android.lazypizza.presentation.design_system.FoodPreviewItemCard
 import com.seenu.dev.android.lazypizza.presentation.design_system.LazyPizzaSearchBar
+import com.seenu.dev.android.lazypizza.presentation.state.FoodItemUiModel
 import com.seenu.dev.android.lazypizza.presentation.state.FoodSection
 import com.seenu.dev.android.lazypizza.presentation.state.UiState
 import com.seenu.dev.android.lazypizza.presentation.theme.LazyPizzaTheme
@@ -41,6 +48,8 @@ import com.seenu.dev.android.lazypizza.presentation.theme.body1Regular
 import com.seenu.dev.android.lazypizza.presentation.theme.body3Bold
 import com.seenu.dev.android.lazypizza.presentation.theme.label2Semibold
 import com.seenu.dev.android.lazypizza.presentation.theme.textSecondary
+import com.seenu.dev.android.lazypizza.presentation.utils.getStringRes
+import kotlinx.coroutines.launch
 import lazypizza.composeapp.generated.resources.Res
 import lazypizza.composeapp.generated.resources.app_name
 import lazypizza.composeapp.generated.resources.ic_phone
@@ -71,7 +80,7 @@ fun PizzaListScreen(
     openDialer: () -> Unit = {},
 ) {
     val viewModel: PizzaListViewModel = koinViewModel()
-    val itemsState by viewModel.items.collectAsStateWithLifecycle()
+    val itemsState by viewModel.filteredItems.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = Modifier
@@ -130,24 +139,11 @@ fun PizzaListScreen(
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
-                LazyPizzaSearchBar(
-                    text = "",
-                    onTextChange = {
-
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-                FoodFilterChip(
-                    filters = listOf("Pizza", "Drink", "Sauces", "Ice Cream"),
-                    selectedFilter = null,
-                    onFilterSelected = { filter ->
-
-                    }
-                )
 
                 Box(
-                    modifier = Modifier.fillMaxWidth().weight(1F),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1F),
                     contentAlignment = Alignment.Center
                 ) {
                     when (val state = itemsState) {
@@ -157,8 +153,37 @@ fun PizzaListScreen(
 
                         is UiState.Success -> {
                             FoodListContent(
-                                data = state.data,
-                                modifier = Modifier.fillMaxSize()
+                                filters = state.data.filters,
+                                data = state.data.sections,
+                                search = state.data.search,
+                                modifier = Modifier.fillMaxSize(),
+                                onAdd = { item ->
+                                    viewModel.handleEvent(
+                                        PizzaListEvent.UpdateCountInCart(
+                                            item.id,
+                                            item.countInCart + 1
+                                        )
+                                    )
+                                },
+                                onReduce = { item ->
+                                    viewModel.handleEvent(
+                                        PizzaListEvent.UpdateCountInCart(
+                                            item.id,
+                                            (item.countInCart - 1).coerceAtLeast(0)
+                                        )
+                                    )
+                                },
+                                onSearchChange = { query ->
+                                    viewModel.handleEvent(PizzaListEvent.Search(query))
+                                },
+                                onRemove = { item ->
+                                    viewModel.handleEvent(
+                                        PizzaListEvent.UpdateCountInCart(
+                                            item.id,
+                                            0
+                                        )
+                                    )
+                                },
                             )
                         }
 
@@ -173,32 +198,110 @@ fun PizzaListScreen(
 }
 
 @Composable
-fun FoodListContent(data: List<FoodSection>, modifier: Modifier = Modifier) {
-    LazyVerticalGrid(modifier = modifier, columns = GridCells.Fixed(1)) {
-        for (section in data) {
-            item(key = section.type) {
-                Text(
-                    text = section.type.name,
-                    style = MaterialTheme.typography.label2Semibold,
-                    color = MaterialTheme.colorScheme.textSecondary,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                )
+fun FoodListContent(
+    filters: List<FoodType>,
+    data: List<FoodSection>,
+    search: String,
+    modifier: Modifier = Modifier,
+    onSearchChange: (String) -> Unit = {},
+    onAdd: (item: FoodItemUiModel) -> Unit = {},
+    onReduce: (item: FoodItemUiModel) -> Unit = {},
+    onRemove: (item: FoodItemUiModel) -> Unit = {}
+) {
+    val sectionHeaderIndex = remember(data) { mapSectionHeaderIndex(data) }
+    Column(modifier = Modifier.fillMaxSize()) {
+        LazyPizzaSearchBar(
+            text = search,
+            onTextChange = onSearchChange
+        )
+        val gridState = rememberLazyGridState()
+        val scope = rememberCoroutineScope()
+        val selectedFilterIndex by remember(data) {
+            derivedStateOf {
+                gridState.findSelectedFilterIndex(sectionHeaderIndex)
             }
+        }
 
-            items(
-                count = section.items.size,
-                key = { index -> section.items[index].id }
-            ) { index ->
-                val item = section.items[index]
-                FoodPreviewItemCard(
-                    data = item,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                )
+        Spacer(modifier = Modifier.height(8.dp))
+        FoodFilterChip(
+            filters = filters.map { stringResource(it.getStringRes()) },
+            selectedFilter = stringResource(filters[selectedFilterIndex].getStringRes()),
+            onFilterSelected = { index, filter ->
+                scope.launch {
+                    val index = data.take(index).sumOf { it.items.size + 1 }
+                    gridState.animateScrollToItem(index)
+                }
+            }
+        )
+
+        LazyVerticalGrid(
+            state = gridState,
+            columns = GridCells.Fixed(1),
+            modifier = modifier
+                .padding(top = 4.dp),
+        ) {
+            for (section in data) {
+                item(key = section.type) {
+                    Text(
+                        text = stringResource(section.type.getStringRes())
+                            .uppercase(),
+                        style = MaterialTheme.typography.label2Semibold,
+                        color = MaterialTheme.colorScheme.textSecondary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    )
+                }
+
+                items(
+                    count = section.items.size,
+                    key = { index -> section.items[index].id }
+                ) { index ->
+                    val item = section.items[index]
+                    FoodPreviewItemCard(
+                        data = item,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        showAddToCart = item.type != FoodType.PIZZA,
+                        onAdd = {
+                            onAdd(item)
+                        },
+                        onRemove = {
+                            onReduce(item)
+                        },
+                        onDelete = {
+                            onRemove(item)
+                        }
+                    )
+                }
             }
         }
     }
+}
+
+private fun mapSectionHeaderIndex(data: List<FoodSection>): IntArray {
+    val array = IntArray(data.size)
+    var index = 0
+    for ((sectionIndex, section) in data.withIndex()) {
+        array[sectionIndex] = index
+        index += section.items.size + 1
+    }
+    return array
+}
+
+private fun LazyGridState.findSelectedFilterIndex(headerIndexList: IntArray): Int {
+    val first = this.layoutInfo.visibleItemsInfo.firstOrNull()?.index ?: 0
+    val last = this.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+
+    var nearestHeaderIndex = 0
+    for ((index, headerIndex) in headerIndexList.withIndex()) {
+        if (headerIndex in first..last) {
+            return index
+        } else if (headerIndex < first) {
+            nearestHeaderIndex = index
+        }
+    }
+
+    return nearestHeaderIndex
 }

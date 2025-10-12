@@ -27,7 +27,7 @@ private fun FoodFilterChipPreview() {
         FoodFilterChip(
             filters = filters,
             selectedFilter = "Pizza",
-            onFilterSelected = {}
+            onFilterSelected = { _, _ -> }
         )
     }
 }
@@ -37,16 +37,17 @@ fun FoodFilterChip(
     modifier: Modifier = Modifier,
     filters: List<String>,
     selectedFilter: String?,
-    onFilterSelected: (String) -> Unit
+    onFilterSelected: (Int, String) -> Unit
 ) {
 
     LazyRow(modifier = modifier.fillMaxWidth()) {
-        items(filters) { filter ->
+        items(filters.size) { index ->
+            val filter = filters[index]
             FoodFilterChipItem(
                 modifier = modifier.padding(end = 8.dp),
                 isSelected = filter == selectedFilter,
                 text = filter,
-                onClick = { onFilterSelected(filter) }
+                onClick = { onFilterSelected(index, filter) }
             )
         }
     }

@@ -28,6 +28,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
+import com.seenu.dev.android.lazypizza.LocalCurrencyFormatter
 import com.seenu.dev.android.lazypizza.presentation.state.AddonUiModel
 import com.seenu.dev.android.lazypizza.presentation.theme.LazyPizzaTheme
 import com.seenu.dev.android.lazypizza.presentation.theme.body1Regular
@@ -50,6 +53,7 @@ fun AddonPreviewCardWithCountPreview() {
                     id = 1L,
                     name = "Extra Cheese",
                     prize = 1.5,
+                    imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/chilli_wm4ain.png",
                     countInCart = 2
                 )
             )
@@ -82,6 +86,7 @@ fun AddonPreviewCardPreview() {
                 id = 1L,
                 name = "Extra Cheese",
                 prize = 1.5,
+                imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/chilli_wm4ain.png",
                 countInCart = 0
             )
         )
@@ -92,6 +97,7 @@ fun AddonPreviewCardPreview() {
 fun AddonPreviewCard(
     modifier: Modifier = Modifier,
     data: AddonUiModel,
+    maxItemCanBeAdded: Int = 3,
     onClick: () -> Unit = {},
     onAdd: () -> Unit = {},
     onRemove: () -> Unit = {}
@@ -114,7 +120,9 @@ fun AddonPreviewCard(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Box(
+            AsyncImage(
+                model = data.imageUrl,
+                contentDescription = data.name,
                 modifier = Modifier
                     .aspectRatio(1F)
                     .sizeIn(minWidth = 108.dp, minHeight = 108.dp)
@@ -134,6 +142,7 @@ fun AddonPreviewCard(
                     modifier = Modifier.fillMaxWidth(),
                     count = data.countInCart,
                     name = data.name,
+                    max = maxItemCanBeAdded,
                     onAdd = onAdd,
                     onRemove = onRemove
                 )
@@ -142,7 +151,8 @@ fun AddonPreviewCard(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val priceLabel = "$${data.prize}" // TODO: format price
+                    val currentFormatter = LocalCurrencyFormatter.current
+                    val priceLabel = currentFormatter.format(data.prize)
                     Text(
                         text = priceLabel,
                         style = MaterialTheme.typography.title1SemiBold,
