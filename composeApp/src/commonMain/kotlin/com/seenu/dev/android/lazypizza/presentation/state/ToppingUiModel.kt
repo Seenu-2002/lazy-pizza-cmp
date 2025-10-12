@@ -4,5 +4,6 @@ data class ToppingUiModel constructor(
     val id: Long,
     val name: String,
     val price: Double,
-    val imageUrl: String
+    val imageUrl: String,
+    val countInCart: Int = 0
 )

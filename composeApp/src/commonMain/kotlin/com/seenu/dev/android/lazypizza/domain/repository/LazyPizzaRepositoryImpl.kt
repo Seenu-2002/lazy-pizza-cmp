@@ -15,14 +15,23 @@ import kotlinx.serialization.json.Json
 class LazyPizzaRepositoryImpl : LazyPizzaRepository {
     override suspend fun getFoodItems(): List<FoodItem> {
         return withContext(Dispatchers.IO) {
-            delay((500L..1000L).random())
+            delay((100L..600L).random())
             Json.decodeFromString<List<FoodItemDto>>(MOCK_JSON_FOOD).map { it.toDomain() }
+        }
+    }
+
+    override suspend fun getFoodItemById(id: Long): FoodItem? {
+        return withContext(Dispatchers.IO) {
+            delay((100L..600L).random())
+            Json.decodeFromString<List<FoodItemDto>>(MOCK_JSON_FOOD).find {
+                it.id == id
+            }?.toDomain()
         }
     }
 
     override suspend fun getToppings(): List<Topping> {
         return withContext(Dispatchers.IO) {
-            delay((500L..1000L).random())
+            delay((100L..600L).random())
             Json.decodeFromString<List<ToppingDto>>(MOCK_JSON_TOPPINGS).map { it.toDomain() }
         }
     }

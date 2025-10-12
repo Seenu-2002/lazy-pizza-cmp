@@ -17,10 +17,8 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -29,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import coil3.compose.SubcomposeAsyncImage
 import com.seenu.dev.android.lazypizza.LocalCurrencyFormatter
 import com.seenu.dev.android.lazypizza.presentation.state.AddonUiModel
 import com.seenu.dev.android.lazypizza.presentation.theme.LazyPizzaTheme
@@ -45,7 +42,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Preview
 @Composable
-fun AddonPreviewCardWithCountPreview() {
+fun AddonCardWithCountPreview() {
     LazyPizzaTheme {
         var data by remember {
             mutableStateOf(
@@ -58,7 +55,7 @@ fun AddonPreviewCardWithCountPreview() {
                 )
             )
         }
-        AddonPreviewCard(
+        ToppingCard(
             modifier = Modifier.padding(8.dp),
             data = data,
             onClick = {
@@ -78,9 +75,9 @@ fun AddonPreviewCardWithCountPreview() {
 
 @Preview
 @Composable
-fun AddonPreviewCardPreview() {
+fun AddonCardPreview() {
     LazyPizzaTheme {
-        AddonPreviewCard(
+        ToppingCard(
             modifier = Modifier.padding(8.dp),
             data = AddonUiModel(
                 id = 1L,
@@ -94,7 +91,7 @@ fun AddonPreviewCardPreview() {
 }
 
 @Composable
-fun AddonPreviewCard(
+fun ToppingCard(
     modifier: Modifier = Modifier,
     data: AddonUiModel,
     maxItemCanBeAdded: Int = 3,
@@ -110,7 +107,8 @@ fun AddonPreviewCard(
             .background(color = MaterialTheme.colorScheme.surfaceHigher, shape = shape)
     ) {
         Box(
-            modifier = Modifier.padding(2.dp)
+            modifier = Modifier
+                .padding(2.dp)
                 .background(
                     shape = shape.copy(
                         bottomStart = CornerSize(0.dp),

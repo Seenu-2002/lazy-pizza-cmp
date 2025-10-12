@@ -19,7 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -29,27 +29,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.seenu.dev.android.lazypizza.LocalCurrencyFormatter
 import com.seenu.dev.android.lazypizza.presentation.state.ToppingUiModel
 import com.seenu.dev.android.lazypizza.presentation.theme.LazyPizzaTheme
 import com.seenu.dev.android.lazypizza.presentation.theme.body3Regular
 import com.seenu.dev.android.lazypizza.presentation.theme.primary8
+import com.seenu.dev.android.lazypizza.presentation.theme.surfaceHigher
 import com.seenu.dev.android.lazypizza.presentation.theme.title2
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
 @Preview
 @Composable
-private fun ToppingItemCardPreviewWithCounter() {
+private fun ToppingCardPreviewWithCounter() {
     LazyPizzaTheme {
-        ToppingItemCard(
+        ToppingCard(
             data = ToppingUiModel(
                 id = 1L,
                 name = "Extra Cheese",
                 price = 1.5,
-                imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/chilli_wm4ain.png"
+                imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/chilli_wm4ain.png",
+                countInCart = 3
             ),
-            count = 2,
             onClick = {},
             onAdd = {},
             onRemove = {}
@@ -59,52 +61,53 @@ private fun ToppingItemCardPreviewWithCounter() {
 
 @Preview
 @Composable
-private fun ToppingItemCardPreview() {
-    var count by remember {
-        mutableIntStateOf(0)
-    }
-    LazyPizzaTheme {
-        ToppingItemCard(
-            data = ToppingUiModel(
+private fun ToppingCardPreview() {
+    var data by remember {
+        mutableStateOf(
+            ToppingUiModel(
                 id = 1L,
                 name = "Extra Cheese",
                 price = 1.5,
-                imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/chilli_wm4ain.png"
-            ),
-            count = count,
+                imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/chilli_wm4ain.png",
+                countInCart = 0
+            )
+        )
+    }
+    LazyPizzaTheme {
+        ToppingCard(
+            data = data,
             onClick = {
-                count = 1
+                data = data.copy(countInCart = 1)
             },
             onAdd = {
-                count++
+                data = data.copy(countInCart = data.countInCart + 1)
             },
             onRemove = {
-                count--
+                data = data.copy(countInCart = (data.countInCart - 1).coerceAtLeast(0))
             }
         )
     }
 }
 
 @Composable
-fun ToppingItemCard(
+fun ToppingCard(
     modifier: Modifier = Modifier,
     data: ToppingUiModel,
-    count: Int,
     onClick: () -> Unit,
     onAdd: () -> Unit,
     onRemove: () -> Unit
 ) {
+    val isInCart = data.countInCart > 0
     Column(
         modifier = modifier
             .width(IntrinsicSize.Max)
             .background(
                 shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colorScheme.surface
+                color = MaterialTheme.colorScheme.surfaceHigher
             )
             .clip(shape = MaterialTheme.shapes.medium)
-
             .clickable(
-                enabled = count == 0,
+                enabled = !isInCart,
                 onClick = onClick,
                 role = Role.Button,
                 interactionSource = remember { MutableInteractionSource() },
@@ -115,30 +118,40 @@ fun ToppingItemCard(
             )
             .border(
                 1.dp,
-                color = if (count == 0) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.primary,
+                color = if (isInCart) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                 shape = MaterialTheme.shapes.medium
             )
             .padding(8.dp)
     ) {
-        Box(modifier = Modifier.fillMaxWidth().padding(8.dp), contentAlignment = Alignment.Center) {
-            Box(
-                modifier = Modifier.size(64.dp)
-                    .background(shape = CircleShape, color = MaterialTheme.colorScheme.primary8)
+        Box(
+            modifier = Modifier
+                .padding(top = 4.dp, bottom = 12.dp)
+                .size(56.dp)
+                .background(shape = CircleShape, color = MaterialTheme.colorScheme.primary8)
+                .align(alignment = Alignment.CenterHorizontally)
+        ) {
+            AsyncImage(
+                model = data.imageUrl,
+                contentDescription = data.name,
+                modifier = Modifier
+                    .size(56.dp)
+                    .align(Alignment.Center)
             )
         }
 
         Text(
             text = data.name,
             style = MaterialTheme.typography.body3Regular,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (count > 0) {
+        if (isInCart) {
             ItemCounter(
                 modifier = Modifier
                     .fillMaxWidth(),
-                count = count,
+                count = data.countInCart,
                 name = data.name,
                 max = 3,
                 onAdd = onAdd,

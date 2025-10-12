@@ -8,4 +8,6 @@
     <string name="drinks">Drinks</string>
     <string name="sauces">Sauces</string>
     <string name="ice_cream">Ice Cream</string>
+    <string name="add_extra_toppings">Add Extra Toppings</string>
+    <string name="add_to_cart_total">Add to Cart for %1$s</string>
 </resources>

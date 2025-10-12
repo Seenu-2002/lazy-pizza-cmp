@@ -77,6 +77,7 @@ private fun PizzaListScreenPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PizzaListScreen(
+    openDetailScreen: (Long) -> Unit = {},
     openDialer: () -> Unit = {},
 ) {
     val viewModel: PizzaListViewModel = koinViewModel()
@@ -157,6 +158,9 @@ fun PizzaListScreen(
                                 data = state.data.sections,
                                 search = state.data.search,
                                 modifier = Modifier.fillMaxSize(),
+                                onClick = {
+                                    openDetailScreen(it.id)
+                                },
                                 onAdd = { item ->
                                     viewModel.handleEvent(
                                         PizzaListEvent.UpdateCountInCart(
@@ -204,6 +208,7 @@ fun FoodListContent(
     search: String,
     modifier: Modifier = Modifier,
     onSearchChange: (String) -> Unit = {},
+    onClick: (item: FoodItemUiModel) -> Unit = {},
     onAdd: (item: FoodItemUiModel) -> Unit = {},
     onReduce: (item: FoodItemUiModel) -> Unit = {},
     onRemove: (item: FoodItemUiModel) -> Unit = {}
@@ -264,6 +269,9 @@ fun FoodListContent(
                             .fillMaxWidth()
                             .padding(vertical = 4.dp),
                         showAddToCart = item.type != FoodType.PIZZA,
+                        onClick = {
+                            onClick(item)
+                        },
                         onAdd = {
                             onAdd(item)
                         },

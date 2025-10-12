@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.compose.setSingletonImageLoaderFactory
@@ -22,6 +23,7 @@ import coil3.request.crossfade
 import coil3.util.DebugLogger
 import com.seenu.dev.android.lazypizza.core.formatter.CurrencyFormatter
 import com.seenu.dev.android.lazypizza.presentation.navigation.Route
+import com.seenu.dev.android.lazypizza.presentation.pizza_detail.PizzaDetailScreen
 import com.seenu.dev.android.lazypizza.presentation.pizza_list.PizzaListScreen
 import com.seenu.dev.android.lazypizza.presentation.theme.LazyPizzaTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -43,11 +45,16 @@ fun App() {
         ) {
 
             composable<Route.PizzaList> {
-                PizzaListScreen()
+                PizzaListScreen(openDialer = {}, openDetailScreen = { id ->
+                    navController.navigate(Route.PizzaDetail(id))
+                })
             }
 
-            composable<Route.PizzaDetail> {
-                Text("Yet to be implemented")
+            composable<Route.PizzaDetail> { backStackEntry ->
+                val route = backStackEntry.toRoute<Route.PizzaDetail>()
+                PizzaDetailScreen(id = route.id, onBack = {
+                    navController.navigateUp()
+                })
             }
         }
     }

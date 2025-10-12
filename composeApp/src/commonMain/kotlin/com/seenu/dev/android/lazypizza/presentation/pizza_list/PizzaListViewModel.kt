@@ -3,6 +3,7 @@ package com.seenu.dev.android.lazypizza.presentation.pizza_list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Logger.Companion.e
 import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaRepository
 import com.seenu.dev.android.lazypizza.domain.model.FoodType
 import com.seenu.dev.android.lazypizza.presentation.mappers.toUiModel
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.math.exp
 
 class PizzaListViewModel constructor(
     private val repository: LazyPizzaRepository
@@ -74,7 +76,7 @@ class PizzaListViewModel constructor(
                     )
                 )
             } catch (exp: Exception) {
-                Logger.e("Error fetching food items: ${exp.message}", exp)
+                e(exp) { "Error fetching food items: ${exp.message}" }
                 _filteredItems.value =
                     UiState.Error("Error fetching food items: ${exp.message}", exception = exp)
             }
@@ -110,7 +112,7 @@ class PizzaListViewModel constructor(
                 val newState =
                     state.copy(sections = newSections, filters = newSections.map { it.type })
                 _filteredItems.value = UiState.Success(newState)
-            } ?: Logger.e("Previous state is not Success. Instead found: ${filteredItems.value}")
+            } ?: e { "Previous state is not Success. Instead found: ${filteredItems.value}" }
         }
     }
 
