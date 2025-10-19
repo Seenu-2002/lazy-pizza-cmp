@@ -73,6 +73,9 @@ kotlin {
 
             // Ktor
             implementation(libs.ktor.client.core)
+
+            // Adaptive
+            implementation(libs.adaptive)
         }
         appleMain.dependencies {
             // Ktor

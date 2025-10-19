@@ -5,19 +5,24 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -25,13 +30,12 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,21 +45,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.dropShadow
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.shadow.Shadow
-import androidx.compose.ui.input.key.Key.Companion.R
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger.Companion.i
@@ -69,14 +66,13 @@ import com.seenu.dev.android.lazypizza.presentation.state.FoodItemUiModel
 import com.seenu.dev.android.lazypizza.presentation.state.ToppingUiModel
 import com.seenu.dev.android.lazypizza.presentation.state.UiState
 import com.seenu.dev.android.lazypizza.presentation.theme.LazyPizzaTheme
-import com.seenu.dev.android.lazypizza.presentation.theme.Outline
 import com.seenu.dev.android.lazypizza.presentation.theme.body3Regular
 import com.seenu.dev.android.lazypizza.presentation.theme.label2Semibold
 import com.seenu.dev.android.lazypizza.presentation.theme.surfaceHigher
-import com.seenu.dev.android.lazypizza.presentation.theme.textPrimary
 import com.seenu.dev.android.lazypizza.presentation.theme.textSecondary
 import com.seenu.dev.android.lazypizza.presentation.theme.textSecondary8
 import com.seenu.dev.android.lazypizza.presentation.theme.title1SemiBold
+import com.seenu.dev.android.lazypizza.presentation.utils.isExpanded
 import lazypizza.composeapp.generated.resources.Res
 import lazypizza.composeapp.generated.resources.add_extra_toppings
 import lazypizza.composeapp.generated.resources.add_to_cart_total
@@ -206,111 +202,44 @@ fun PizzaDetailContent(
     onAddTopping: (ToppingUiModel) -> Unit,
     onRemoveTopping: (ToppingUiModel) -> Unit
 ) {
-    Box(modifier = modifier) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Box(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                contentAlignment = Alignment.Center
-            ) {
-                SubcomposeAsyncImage(
-                    model = data.imageUrl,
-                    contentDescription = data.name,
-                    modifier = Modifier
-                        .size(240.dp)
-                        .aspectRatio(1F),
-                    loading = {
-                        Text(text = "Loading...") // FIXME: Move it to shimmer
-                    }
-                )
-            }
-
-            val radius = 24.dp
-            val shape = RoundedCornerShape(topStart = radius)
-            val color = MaterialTheme.colorScheme.surfaceHigher
-            Column(
+    PizzaDetailContainer(
+        modifier = modifier,
+        pizzaImage = {
+            SubcomposeAsyncImage(
+                model = data.imageUrl,
+                contentDescription = data.name,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1F)
-                    .drawBehind {
-                        val radiusInPx = with(density) { radius.toPx() }
-                        val path = Path()
-                        path.moveTo(0F, radiusInPx)
-                        path.cubicTo(
-                            0F, radiusInPx,
-                            0F, 0F,
-                            radiusInPx, 0F
-                        )
-                        path.lineTo(size.width - radiusInPx, 0F)
-                        path.cubicTo(
-                            size.width - radiusInPx, 0F,
-                            size.width, 0F,
-                            size.width, -radiusInPx
-                        )
-                        path.lineTo(size.width, size.height)
-                        path.lineTo(0F, size.height)
-                        path.lineTo(0F, radiusInPx)
-                        drawPath(path, color = color)
-                    }
-                    .dropShadow(
-                        shape = shape,
-                        shadow = Shadow(
-                            radius = 16.dp,
-                            spread = 0.dp,
-                            color = Color(0x03131F0A),
-                            offset = DpOffset(x = 4.dp, 4.dp)
-                        )
-                    )
-                    .padding(horizontal = 16.dp, vertical = 20.dp)
-            ) {
-                Text(
-                    text = data.name,
-                    style = MaterialTheme.typography.title1SemiBold,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                data.ingredients?.let { ingredients ->
-                    Text(
-                        text = ingredients,
-                        style = MaterialTheme.typography.body3Regular,
-                        color = MaterialTheme.colorScheme.textSecondary,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    .size(240.dp)
+                    .aspectRatio(1F),
+                loading = {
+                    Text(text = "Loading...") // FIXME: Move it to shimmer
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+            )
+        },
+        pizzaInfo = {
+            Text(
+                text = data.name,
+                style = MaterialTheme.typography.title1SemiBold,
+                modifier = Modifier.fillMaxWidth()
+            )
+            data.ingredients?.let { ingredients ->
                 Text(
-                    text = stringResource(Res.string.add_extra_toppings),
-                    style = MaterialTheme.typography.label2Semibold,
+                    text = ingredients,
+                    style = MaterialTheme.typography.body3Regular,
                     color = MaterialTheme.colorScheme.textSecondary,
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                ToppingsList(
-                    toppings = toppings,
-                    modifier = Modifier.weight(1F),
-                    onAddTopping = onAddTopping,
-                    onRemoveTopping = onRemoveTopping
-                )
-
             }
-        }
-        Box(
-            modifier = Modifier.fillMaxWidth()
-                .background(
-                    brush = Brush.verticalGradient(
-                        listOf(
-                            Color.Transparent,
-                            Color.White,
-                            Color.White,
-                        )
-                    )
-                )
-                .padding(
-                    top = 36.dp,
-                    bottom = 8.dp
-                )
-                .padding(16.dp).align(Alignment.BottomCenter),
-        ) {
+        },
+        toppingsContent = {
+            ToppingsList(
+                toppings = toppings,
+                modifier = Modifier.weight(1F),
+                onAddTopping = onAddTopping,
+                onRemoveTopping = onRemoveTopping
+            )
+        },
+        addToCartButton = {
             Button(
                 onClick = {},
                 modifier = Modifier.fillMaxWidth()
@@ -343,7 +272,9 @@ fun PizzaDetailContent(
                 )
             }
         }
-    }
+
+    )
+
 }
 
 @Preview
@@ -390,6 +321,134 @@ fun ToppingsList(
                     onRemoveTopping(it)
                 },
             )
+        }
+    }
+}
+
+@Composable
+fun PizzaDetailContainer(
+    modifier: Modifier = Modifier,
+    pizzaImage: @Composable () -> Unit,
+    pizzaInfo: @Composable () -> Unit,
+    toppingsContent: @Composable ColumnScope.() -> Unit,
+    addToCartButton: @Composable () -> Unit
+) {
+    if (isExpanded()) {
+
+        Row(modifier = modifier) {
+            Column(modifier = Modifier.weight(1F).padding(16.dp)) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    pizzaImage()
+                }
+                pizzaInfo()
+            }
+            Column(
+                modifier = Modifier.weight(1F)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceHigher, shape = RoundedCornerShape(
+                            topStart = 16.dp,
+                            bottomStart = 16.dp
+                        )
+                    )
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = stringResource(Res.string.add_extra_toppings),
+                    style = MaterialTheme.typography.label2Semibold,
+                    color = MaterialTheme.colorScheme.textSecondary,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                toppingsContent()
+                addToCartButton()
+            }
+        }
+
+    } else {
+        Box(modifier = modifier) {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Box(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    contentAlignment = Alignment.Center
+                ) {
+                    pizzaImage()
+                }
+
+                val radius = 24.dp
+                val shape = RoundedCornerShape(topStart = radius)
+                val color = MaterialTheme.colorScheme.surfaceHigher
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1F)
+                        .drawBehind {
+                            val radiusInPx = with(density) { radius.toPx() }
+                            val path = Path()
+                            path.moveTo(0F, radiusInPx)
+                            path.cubicTo(
+                                0F, radiusInPx,
+                                0F, 0F,
+                                radiusInPx, 0F
+                            )
+                            path.lineTo(size.width - radiusInPx, 0F)
+                            path.cubicTo(
+                                size.width - radiusInPx, 0F,
+                                size.width, 0F,
+                                size.width, -radiusInPx
+                            )
+                            path.lineTo(size.width, size.height)
+                            path.lineTo(0F, size.height)
+                            path.lineTo(0F, radiusInPx)
+                            drawPath(path, color = color)
+                        }
+                        .dropShadow(
+                            shape = shape,
+                            shadow = Shadow(
+                                radius = 16.dp,
+                                spread = 0.dp,
+                                color = Color(0x03131F0A),
+                                offset = DpOffset(x = 4.dp, 4.dp)
+                            )
+                        )
+                        .padding(horizontal = 16.dp, vertical = 20.dp)
+                ) {
+                    pizzaInfo()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(Res.string.add_extra_toppings),
+                        style = MaterialTheme.typography.label2Semibold,
+                        color = MaterialTheme.colorScheme.textSecondary,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    toppingsContent()
+                }
+            }
+            Box(
+                modifier = Modifier.fillMaxWidth()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            listOf(
+                                Color.Transparent,
+                                Color.White,
+                                Color.White,
+                            )
+                        )
+                    )
+                    .padding(
+                        top = 36.dp,
+                        bottom = 8.dp
+                    )
+                    .padding(16.dp)
+                    .align(Alignment.BottomCenter),
+            ) {
+                addToCartButton()
+            }
         }
     }
 }

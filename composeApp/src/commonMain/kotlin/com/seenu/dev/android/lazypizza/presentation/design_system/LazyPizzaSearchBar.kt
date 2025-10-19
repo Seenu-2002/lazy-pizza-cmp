@@ -69,18 +69,18 @@ fun LazyPizzaSearchBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .dropShadow(
+                shape = CircleShape,
+                shadow = androidx.compose.ui.graphics.shadow.Shadow(
+                    radius = 16.dp,
+                    spread = 0.dp,
+                    color = Color(0x0A03131F),
+                    offset = DpOffset(x = 0.dp, 4.dp)
+                )
+            )
             .background(
                 color = MaterialTheme.colorScheme.surfaceHigher,
                 shape = CircleShape
-            )
-            .dropShadow(
-                shape = CircleShape,
-                shadow = Shadow(
-                    radius = 10.dp,
-                    spread = 6.dp,
-                    color = Color(0x03131F0A),
-                    offset = DpOffset(x = 4.dp, 4.dp)
-                )
             )
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically

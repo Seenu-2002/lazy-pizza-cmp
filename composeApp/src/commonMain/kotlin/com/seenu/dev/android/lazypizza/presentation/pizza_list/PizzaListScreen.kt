@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -35,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.seenu.dev.android.lazypizza.LocalDimensions
 import com.seenu.dev.android.lazypizza.di.LazyPizzaModule
 import com.seenu.dev.android.lazypizza.domain.model.FoodType
 import com.seenu.dev.android.lazypizza.presentation.design_system.FoodFilterChip
@@ -83,6 +85,7 @@ fun PizzaListScreen(
     val viewModel: PizzaListViewModel = koinViewModel()
     val itemsState by viewModel.filteredItems.collectAsStateWithLifecycle()
 
+    val dimensions = LocalDimensions.current.listScreen
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -134,9 +137,9 @@ fun PizzaListScreen(
                     painter = painterResource(Res.drawable.img_banner),
                     contentDescription = "Pizza Banner Image",
                     modifier = Modifier.fillMaxWidth()
-                        .aspectRatio(2.5F)
+                        .height(dimensions.bannerHeight)
                         .clip(MaterialTheme.shapes.small),
-                    contentScale = ContentScale.FillBounds
+                    contentScale = ContentScale.FillWidth
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -227,7 +230,7 @@ fun FoodListContent(
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
         FoodFilterChip(
             filters = filters.map { stringResource(it.getStringRes()) },
             selectedFilter = stringResource(filters[selectedFilterIndex].getStringRes()),
@@ -239,14 +242,19 @@ fun FoodListContent(
             }
         )
 
+        val dimensions = LocalDimensions.current.listScreen
         LazyVerticalGrid(
             state = gridState,
-            columns = GridCells.Fixed(1),
+            columns = GridCells.Fixed(dimensions.gridCount),
             modifier = modifier
                 .padding(top = 4.dp),
         ) {
             for (section in data) {
-                item(key = section.type) {
+                item(
+                    key = section.type,
+                    span = {
+                        GridItemSpan(maxLineSpan)
+                    }) {
                     Text(
                         text = stringResource(section.type.getStringRes())
                             .uppercase(),
