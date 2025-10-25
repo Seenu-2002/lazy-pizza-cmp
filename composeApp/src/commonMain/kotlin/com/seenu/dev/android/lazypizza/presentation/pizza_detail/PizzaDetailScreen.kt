@@ -84,7 +84,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PizzaDetailScreen(id: Long, onBack: () -> Unit) {
+fun PizzaDetailScreen(id: String, onBack: () -> Unit) {
     val viewModel: PizzaDetailViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -168,7 +168,7 @@ fun PizzaDetailScreen(id: Long, onBack: () -> Unit) {
 private fun PizzaDetailContentPreview() {
     LazyPizzaTheme {
         val item = FoodItem(
-            id = 2,
+            id = "2",
             name = "Pepperoni",
             type = FoodType.PIZZA,
             ingredients = listOf("Tomato sauce", "mozzarella", "pepperoni"),

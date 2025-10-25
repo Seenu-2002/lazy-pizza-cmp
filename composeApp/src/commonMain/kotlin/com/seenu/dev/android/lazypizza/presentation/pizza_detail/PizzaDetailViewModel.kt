@@ -40,7 +40,7 @@ class PizzaDetailViewModel constructor(
         }
     }
 
-    private fun loadPizzaDetail(id: Long) {
+    private fun loadPizzaDetail(id: String) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading()
             try {
@@ -100,7 +100,7 @@ data class PizzaDetailUiState constructor(
 }
 
 sealed interface PizzaDetailEvent {
-    data class LoadPizzaDetail(val id: Long) : PizzaDetailEvent
+    data class LoadPizzaDetail(val id: String) : PizzaDetailEvent
     data class AddTopping(val topping: ToppingUiModel) : PizzaDetailEvent
     data class RemoveTopping(val topping: ToppingUiModel) : PizzaDetailEvent
 }

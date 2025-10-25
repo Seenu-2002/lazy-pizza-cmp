@@ -1,7 +1,7 @@
 package com.seenu.dev.android.lazypizza.domain.model
 
 data class FoodItem constructor(
-    val id: Long,
+    val id: String,
     val name: String,
     val type: FoodType,
     val ingredients: List<String>,

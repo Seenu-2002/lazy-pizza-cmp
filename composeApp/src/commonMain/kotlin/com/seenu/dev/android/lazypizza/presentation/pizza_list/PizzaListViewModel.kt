@@ -83,7 +83,7 @@ class PizzaListViewModel constructor(
         }
     }
 
-    private fun updateCountInCard(itemId: Long, count: Int) {
+    private fun updateCountInCard(itemId: String, count: Int) {
         viewModelScope.launch {
             val newSections = mutableListOf<FoodSection>()
             val items = (filteredItems.value as? UiState.Success)?.data?.sections
@@ -138,7 +138,7 @@ class PizzaListViewModel constructor(
 }
 
 sealed interface PizzaListEvent {
-    data class UpdateCountInCart(val itemId: Long, val count: Int) : PizzaListEvent
+    data class UpdateCountInCart(val itemId: String, val count: Int) : PizzaListEvent
     data class Search(val query: String) : PizzaListEvent
 }
 

@@ -79,7 +79,7 @@ private fun PizzaListScreenPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PizzaListScreen(
-    openDetailScreen: (Long) -> Unit = {},
+    openDetailScreen: (String) -> Unit = {},
     openDialer: () -> Unit = {},
 ) {
     val viewModel: PizzaListViewModel = koinViewModel()

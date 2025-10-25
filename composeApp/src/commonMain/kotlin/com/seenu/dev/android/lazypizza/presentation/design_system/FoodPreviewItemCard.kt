@@ -66,7 +66,7 @@ fun FoodPreviewItemCardWithCountPreview() {
         var data by remember {
             mutableStateOf(
                 FoodItemUiModel(
-                    id = 1L,
+                    id = "1",
                     name = "Veggie Delight",
                     type = FoodType.PIZZA,
                     ingredients = "Tomato, Lettuce, Olives, Bell Peppers",
@@ -98,7 +98,7 @@ fun FoodPreviewItemCardWithCountPreview() {
 fun FoodPreviewItemCardPreview() {
     LazyPizzaTheme {
         val data = FoodItemUiModel(
-            id = 1L,
+            id = "1",
             name = "Veggie Delight",
             type = FoodType.PIZZA,
             ingredients = "Tomato, Lettuce, Olives, Bell Peppers",
@@ -114,7 +114,7 @@ fun FoodPreviewItemCardPreview() {
 fun FoodPreviewItemCardWithCardPreview() {
     LazyPizzaTheme {
         val data = FoodItemUiModel(
-            id = 1L,
+            id = "1",
             name = "Mineral Water",
             type = FoodType.DRINK,
             ingredients = null,

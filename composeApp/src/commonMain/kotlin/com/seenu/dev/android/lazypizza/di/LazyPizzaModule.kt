@@ -1,7 +1,8 @@
 package com.seenu.dev.android.lazypizza.di
 
 import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaRepository
-import com.seenu.dev.android.lazypizza.domain.repository.LazyPizzaRepositoryImpl
+import com.seenu.dev.android.lazypizza.domain.repository.FirebaseLazyPizzaRepository
+import com.seenu.dev.android.lazypizza.domain.repository.InMemoryLazyPizzaRepository
 import com.seenu.dev.android.lazypizza.presentation.pizza_detail.PizzaDetailViewModel
 import com.seenu.dev.android.lazypizza.presentation.pizza_list.PizzaListViewModel
 import org.koin.android.annotation.KoinViewModel
@@ -22,6 +23,6 @@ class LazyPizzaModule {
         PizzaDetailViewModel(repository)
 
     @Single(binds = [LazyPizzaRepository::class])
-    fun lazyPizzaRepository(): LazyPizzaRepository = LazyPizzaRepositoryImpl()
+    fun lazyPizzaRepository(): LazyPizzaRepository = FirebaseLazyPizzaRepository()
 
 }

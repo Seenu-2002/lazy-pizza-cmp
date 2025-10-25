@@ -6,24 +6,32 @@ import com.seenu.dev.android.lazypizza.data.mappers.toDomain
 import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaRepository
 import com.seenu.dev.android.lazypizza.domain.model.FoodItem
 import com.seenu.dev.android.lazypizza.domain.model.Topping
+import dev.gitlive.firebase.Firebase
+import dev.gitlive.firebase.firestore.firestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
-class LazyPizzaRepositoryImpl : LazyPizzaRepository {
+class FirebaseLazyPizzaRepository : LazyPizzaRepository {
+
+    private val firestore = Firebase.firestore
+    val json = Json { ignoreUnknownKeys = true }
+
     override suspend fun getFoodItems(): List<FoodItem> {
         return withContext(Dispatchers.IO) {
-            delay((100L..600L).random())
-            Json.decodeFromString<List<FoodItemDto>>(MOCK_JSON_FOOD).map { it.toDomain() }
+            firestore.collection("food_items")
+                .get()
+                .documents
+                .map { it.data<FoodItemDto>().copy(id = it.id).toDomain() }
         }
     }
 
-    override suspend fun getFoodItemById(id: Long): FoodItem? {
+    override suspend fun getFoodItemById(id: String): FoodItem? {
         return withContext(Dispatchers.IO) {
             delay((100L..600L).random())
-            Json.decodeFromString<List<FoodItemDto>>(MOCK_JSON_FOOD).find {
+            json.decodeFromString<List<FoodItemDto>>(MOCK_JSON_FOOD).find {
                 it.id == id
             }?.toDomain()
         }
@@ -32,7 +40,7 @@ class LazyPizzaRepositoryImpl : LazyPizzaRepository {
     override suspend fun getToppings(): List<Topping> {
         return withContext(Dispatchers.IO) {
             delay((100L..600L).random())
-            Json.decodeFromString<List<ToppingDto>>(MOCK_JSON_TOPPINGS).map { it.toDomain() }
+            json.decodeFromString<List<ToppingDto>>(MOCK_JSON_TOPPINGS).map { it.toDomain() }
         }
     }
 }
@@ -45,7 +53,7 @@ private val MOCK_JSON_FOOD = """
         "type": "PIZZA",
         "ingredients": ["Tomato sauce", "mozzarella", "fresh basil", "olive oil"],
         "price": 8.99,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/Margherita_feiryf.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/Margherita_feiryf.png"
       },
       {
         "id": 2,
@@ -53,7 +61,7 @@ private val MOCK_JSON_FOOD = """
         "type": "PIZZA",
         "ingredients": ["Tomato sauce", "mozzarella", "pepperoni"],
         "price": 9.99,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/Pepperoni_ety6cd.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/Pepperoni_ety6cd.png"
       },
       {
         "id": 3,
@@ -61,7 +69,7 @@ private val MOCK_JSON_FOOD = """
         "type": "PIZZA",
         "ingredients": ["Tomato sauce", "mozzarella", "ham", "pineapple"],
         "price": 10.49,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/Hawaiian_ztwobr.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/Hawaiian_ztwobr.png"
       },
       {
         "id": 4,
@@ -69,7 +77,7 @@ private val MOCK_JSON_FOOD = """
         "type": "PIZZA",
         "ingredients": ["BBQ sauce", "mozzarella", "grilled chicken", "onion", "corn"],
         "price": 11.49,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/BBQ_Chicken_jkwqor.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/BBQ_Chicken_jkwqor.png"
       },
       {
         "id": 5,
@@ -77,7 +85,7 @@ private val MOCK_JSON_FOOD = """
         "type": "PIZZA",
         "ingredients": ["Mozzarella", "gorgonzola", "parmesan", "ricotta"],
         "price": 11.99,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/Four_Cheese_huejuf.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/Four_Cheese_huejuf.png"
       },
       {
         "id": 6,
@@ -85,7 +93,7 @@ private val MOCK_JSON_FOOD = """
         "type": "PIZZA",
         "ingredients": ["Tomato sauce", "mozzarella", "mushrooms", "olives", "bell pepper", "onion", "corn"],
         "price": 9.79,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595127/Veggie_Delight_xvjir3.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595127/Veggie_Delight_xvjir3.png"
       },
       {
         "id": 7,
@@ -93,7 +101,7 @@ private val MOCK_JSON_FOOD = """
         "type": "PIZZA",
         "ingredients": ["Tomato sauce", "mozzarella", "pepperoni", "ham", "bacon", "sausage"],
         "price": 12.49,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/Meat_Lovers_pz9cah.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/Meat_Lovers_pz9cah.png"
       },
       {
         "id": 8,
@@ -101,7 +109,7 @@ private val MOCK_JSON_FOOD = """
         "type": "PIZZA",
         "ingredients": ["Tomato sauce", "mozzarella", "spicy salami", "jalapeños", "red chili pepper", "garlic"],
         "price": 11.29,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595126/Spicy_Inferno_mz1ddl.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595126/Spicy_Inferno_mz1ddl.png"
       },
       {
         "id": 9,
@@ -109,7 +117,7 @@ private val MOCK_JSON_FOOD = """
         "type": "PIZZA",
         "ingredients": ["Tomato sauce", "mozzarella", "shrimp", "mussels", "squid", "parsley"],
         "price": 13.99,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595125/Seafood_Special_k4urjr.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595125/Seafood_Special_k4urjr.png"
       },
       {
         "id": 10,
@@ -117,7 +125,7 @@ private val MOCK_JSON_FOOD = """
         "type": "PIZZA",
         "ingredients": ["Cream sauce", "mozzarella", "mushrooms", "truffle oil", "parmesan"],
         "price": 12.99,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595129/Truffle_Mushroom_mbs6cg.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595129/Truffle_Mushroom_mbs6cg.png"
       },
       {
         "id": 11,
@@ -125,7 +133,7 @@ private val MOCK_JSON_FOOD = """
         "type": "DRINK",
         "ingredients": [],
         "price": 1.49,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595126/mineral_water_hwbjbv.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595126/mineral_water_hwbjbv.png"
       },
       {
         "id": 12,
@@ -133,7 +141,7 @@ private val MOCK_JSON_FOOD = """
         "type": "DRINK",
         "ingredients": [],
         "price": 1.89,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595126/7-up_conszk.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595126/7-up_conszk.png"
       },
       {
         "id": 13,
@@ -141,7 +149,7 @@ private val MOCK_JSON_FOOD = """
         "type": "DRINK",
         "ingredients": [],
         "price": 1.99,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595125/pepsi_rbzmx1.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595125/pepsi_rbzmx1.png"
       },
       {
         "id": 14,
@@ -149,7 +157,7 @@ private val MOCK_JSON_FOOD = """
         "type": "DRINK",
         "ingredients": [],
         "price": 2.49,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595125/orange_juice_tdpptc.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595125/orange_juice_tdpptc.png"
       },
       {
         "id": 15,
@@ -157,7 +165,7 @@ private val MOCK_JSON_FOOD = """
         "type": "DRINK",
         "ingredients": [],
         "price": 2.29,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595126/apple_juice_d33zxd.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595126/apple_juice_d33zxd.png"
       },
       {
         "id": 16,
@@ -165,7 +173,7 @@ private val MOCK_JSON_FOOD = """
         "type": "DRINK",
         "ingredients": [],
         "price": 2.19,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595126/iced_tea_fxyjlr.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595126/iced_tea_fxyjlr.png"
       },
       {
         "id": 17,
@@ -173,7 +181,7 @@ private val MOCK_JSON_FOOD = """
         "type": "SAUCE",
         "ingredients": [],
         "price": 0.59,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595129/Garlic_Sauce_n7otqj.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595129/Garlic_Sauce_n7otqj.png"
       },
       {
         "id": 18,
@@ -181,7 +189,7 @@ private val MOCK_JSON_FOOD = """
         "type": "SAUCE",
         "ingredients": [],
         "price": 0.59,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/BBQ_Sauce_nkr8ao.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/BBQ_Sauce_nkr8ao.png"
       },
       {
         "id": 19,
@@ -189,7 +197,7 @@ private val MOCK_JSON_FOOD = """
         "type": "SAUCE",
         "ingredients": [],
         "price": 0.89,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595129/Cheese_Sauce_bhddzc.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595129/Cheese_Sauce_bhddzc.png"
       },
       {
         "id": 20,
@@ -197,7 +205,7 @@ private val MOCK_JSON_FOOD = """
         "type": "SAUCE",
         "ingredients": [],
         "price": 0.59,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595129/Spicy_Chili_Sauce_bukcis.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595129/Spicy_Chili_Sauce_bukcis.png"
       },
       {
         "id": 21,
@@ -205,7 +213,7 @@ private val MOCK_JSON_FOOD = """
         "type": "ICE_CREAM",
         "ingredients": [],
         "price": 2.49,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/vanilla_th5czo.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/vanilla_th5czo.png"
       },
       {
         "id": 22,
@@ -213,7 +221,7 @@ private val MOCK_JSON_FOOD = """
         "type": "ICE_CREAM",
         "ingredients": [],
         "price": 2.49,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595132/chocolate_obrqge.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595132/chocolate_obrqge.png"
       },
       {
         "id": 23,
@@ -221,7 +229,7 @@ private val MOCK_JSON_FOOD = """
         "type": "ICE_CREAM",
         "ingredients": [],
         "price": 2.49,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595132/strawberry_vhcsvv.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595132/strawberry_vhcsvv.png"
       },
       {
         "id": 24,
@@ -229,7 +237,7 @@ private val MOCK_JSON_FOOD = """
         "type": "ICE_CREAM",
         "ingredients": [],
         "price": 2.79,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/cookies_l3pf8z.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/cookies_l3pf8z.png"
       },
       {
         "id": 25,
@@ -237,7 +245,7 @@ private val MOCK_JSON_FOOD = """
         "type": "ICE_CREAM",
         "ingredients": [],
         "price": 2.99,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595132/pistachio_ap6a9q.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595132/pistachio_ap6a9q.png"
       },
       {
         "id": 26,
@@ -245,7 +253,7 @@ private val MOCK_JSON_FOOD = """
         "type": "ICE_CREAM",
         "ingredients": [],
         "price": 2.69,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/mango_sorbet_yzjqft.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/mango_sorbet_yzjqft.png"
       }
     ]
 
@@ -257,73 +265,73 @@ private val MOCK_JSON_TOPPINGS = """
         "id": 27,
         "name": "Bacon",
         "price": 1,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/bacon_jsutui.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/bacon_jsutui.png"
       },
       {
         "id": 28,
         "name": "Extra Cheese",
         "price": 1,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595130/cheese_ebyftk.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595130/cheese_ebyftk.png"
       },
       {
         "id": 29,
         "name": "Corn",
         "price": 0.5,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595130/corn_atu9xo.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595130/corn_atu9xo.png"
       },
       {
         "id": 30,
         "name": "Tomato",
         "price": 0.5,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595130/tomato_zxv5ws.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595130/tomato_zxv5ws.png"
       },
       {
         "id": 31,
         "name": "Olives",
         "price": 0.5,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595130/olive_bdxnsj.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595130/olive_bdxnsj.png"
       },
       {
         "id": 32,
         "name": "Pepperoni",
         "price": 1,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595129/pepperoni_zr0rxm.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595129/pepperoni_zr0rxm.png"
       },
       {
         "id": 33,
         "name": "Mushrooms",
         "price": 0.5,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595130/mashroom_vb2evw.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595130/mashroom_vb2evw.png"
       },
       {
         "id": 34,
         "name": "Basil",
         "price": 0.5,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595130/basil_x1efyb.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595130/basil_x1efyb.png"
       },
       {
         "id": 35,
         "name": "Pineapple",
         "price": 1,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595130/pineapple_b2ua3x.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595130/pineapple_b2ua3x.png"
       },
       {
         "id": 36,
         "name": "Onion",
         "price": 0.5,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595130/onion_owmrhy.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595130/onion_owmrhy.png"
       },
       {
         "id": 37,
         "name": "Chili Peppers",
         "price": 0.5,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/chilli_wm4ain.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/chilli_wm4ain.png"
       },
       {
         "id": 38,
         "name": "Spinach",
         "price": 0.5,
-        "imageUrl": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/spinach_qdwsh8.png"
+        "image_url": "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/spinach_qdwsh8.png"
       }
     ]
 """.trimIndent()
