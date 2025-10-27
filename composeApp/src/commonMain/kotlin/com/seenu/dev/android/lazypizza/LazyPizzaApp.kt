@@ -3,12 +3,11 @@ package com.seenu.dev.android.lazypizza
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import co.touchlab.kermit.Logger
 import coil3.compose.setSingletonImageLoaderFactory
 import com.seenu.dev.android.lazypizza.presentation.navigation.LazyPizzaNavigationMobile
@@ -31,20 +30,20 @@ fun LazyPizzaApp() {
         val navController = rememberNavController()
 
         val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentRoute = navBackStackEntry?.toRouteOrNull()
         val selected by derivedStateOf {
-            val currentRoute = navBackStackEntry?.destination?.route?.toRouteOrNull()
-            Logger.e {
-                "Current Route: ${navBackStackEntry?.destination?.route}"
-            }
-            Logger.e {
-                "Parsed Route: $currentRoute"
-            }
             when (currentRoute) {
                 NavItem.PizzaListItem.route -> NavItem.PizzaListItem
                 NavItem.CartItem.route -> NavItem.CartItem
                 NavItem.HistoryItem.route -> NavItem.HistoryItem
                 else -> NavItem.PizzaListItem
             }
+        }
+        val showNavBar by derivedStateOf {
+            Logger.e {
+                "Current Route: $currentRoute"
+            }
+            currentRoute !is Route.PizzaDetail
         }
         val items = remember {
             listOf(
@@ -67,6 +66,7 @@ fun LazyPizzaApp() {
             )
         } else {
             LazyPizzaNavigationMobile(
+                showBottomBar = showNavBar,
                 navController = navController,
                 navItems = items,
                 selectedNavItem = selected,
@@ -80,18 +80,16 @@ fun LazyPizzaApp() {
     }
 }
 
-fun String.toRouteOrNull(): Route? {
-    return when (this) {
+fun NavBackStackEntry.toRouteOrNull(): Route? {
+    val route = destination.route
+    return when (route) {
         Route.PizzaList::class.qualifiedName -> Route.PizzaList
         Route.Cart::class.qualifiedName -> Route.Cart
         Route.History::class.qualifiedName -> Route.History
         else -> {
-            try {
-                Json.decodeFromString<Route>(this)
-            } catch (exp: SerializationException) {
-                Logger.e {
-                    "Error parsing route from string: $this, exception: $exp"
-                }
+            if (route?.startsWith(Route.PizzaDetail::class.qualifiedName ?: "") == true) {
+                toRoute<Route.PizzaDetail>()
+            } else {
                 null
             }
         }

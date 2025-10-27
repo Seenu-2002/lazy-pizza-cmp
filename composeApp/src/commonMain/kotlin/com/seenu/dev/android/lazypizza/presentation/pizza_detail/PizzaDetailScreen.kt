@@ -5,21 +5,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -31,11 +27,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -84,13 +78,23 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PizzaDetailScreen(id: String, onBack: () -> Unit) {
+fun PizzaDetailScreen(id: String, onBack: () -> Unit, openCartScreen: () -> Unit) {
     val viewModel: PizzaDetailViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         if (uiState is UiState.Empty) {
-            viewModel.handleEvent(PizzaDetailEvent.LoadPizzaDetail(id))
+            viewModel.handleEvent(PizzaDetailIntent.LoadPizzaDetail(id))
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect {
+            when (it) {
+                is PizzaDetailSideEffect.OpenCart -> {
+                    openCartScreen()
+                }
+            }
         }
     }
 
@@ -146,10 +150,13 @@ fun PizzaDetailScreen(id: String, onBack: () -> Unit) {
                         toppings = state.data.toppings,
                         total = state.data.cartTotal,
                         onAddTopping = {
-                            viewModel.handleEvent(PizzaDetailEvent.AddTopping(it))
+                            viewModel.handleEvent(PizzaDetailIntent.AddTopping(it))
                         },
                         onRemoveTopping = {
-                            viewModel.handleEvent(PizzaDetailEvent.RemoveTopping(it))
+                            viewModel.handleEvent(PizzaDetailIntent.RemoveTopping(it))
+                        },
+                        onAddToCart = {
+                            viewModel.handleEvent(PizzaDetailIntent.UpdateCart)
                         }
                     )
                 }
@@ -177,7 +184,7 @@ private fun PizzaDetailContentPreview() {
         )
         val toppings = (0..20).map {
             ToppingUiModel(
-                id = it.toLong(),
+                id = it.toString(),
                 name = "Bacon",
                 price = 1.0,
                 imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/bacon_jsutui.png",
@@ -189,7 +196,8 @@ private fun PizzaDetailContentPreview() {
             toppings = toppings,
             total = 12.99,
             onAddTopping = {},
-            onRemoveTopping = {})
+            onRemoveTopping = {},
+            onAddToCart = {})
     }
 }
 
@@ -200,7 +208,8 @@ fun PizzaDetailContent(
     toppings: List<ToppingUiModel>,
     total: Double,
     onAddTopping: (ToppingUiModel) -> Unit,
-    onRemoveTopping: (ToppingUiModel) -> Unit
+    onRemoveTopping: (ToppingUiModel) -> Unit,
+    onAddToCart: () -> Unit
 ) {
     PizzaDetailContainer(
         modifier = modifier,
@@ -241,7 +250,7 @@ fun PizzaDetailContent(
         },
         addToCartButton = {
             Button(
-                onClick = {},
+                onClick = onAddToCart,
                 modifier = Modifier.fillMaxWidth()
                     .dropShadow(
                         shape = CircleShape,
@@ -283,7 +292,7 @@ fun ToppingsListPreview() {
     LazyPizzaTheme {
         val toppings = (0..20).map {
             ToppingUiModel(
-                id = it.toLong(),
+                id = "$it",
                 name = "Bacon",
                 price = 1.0,
                 imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/bacon_jsutui.png",

@@ -10,6 +10,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key.Companion.R
 import androidx.compose.ui.unit.dp
@@ -32,6 +33,7 @@ import lazypizza.composeapp.generated.resources.not_signed_in_msg
 import lazypizza.composeapp.generated.resources.sign_in
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 
 @Preview
 @Composable
@@ -42,6 +44,18 @@ private fun PizzaCartScreenPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PizzaCartScreen(onBackToMenu: () -> Unit) {
+
+    val viewModel: PizzaCartViewModel = koinViewModel()
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect {
+            when (it) {
+                CartSideEffect.Checkout -> {
+                    // TODO: Checkout logic
+                }
+            }
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         CenterAlignedTopAppBar(

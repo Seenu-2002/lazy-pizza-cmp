@@ -12,3 +12,8 @@ data class FoodItem constructor(
 enum class FoodType {
     PIZZA, DRINK, SAUCE, ICE_CREAM
 }
+
+data class FoodItemWithCount(
+    val foodItem: FoodItem,
+    val count: Int,
+)

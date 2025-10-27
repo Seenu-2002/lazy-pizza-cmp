@@ -1,5 +1,13 @@
 package com.seenu.dev.android.lazypizza.presentation.navigation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOut
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -67,6 +75,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun LazyPizzaNavigationMobile(
+    showBottomBar: Boolean,
     navController: NavHostController,
     navItems: List<NavItem>,
     selectedNavItem: NavItem,
@@ -77,14 +86,24 @@ fun LazyPizzaNavigationMobile(
         modifier = Modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets.systemBars.only(WindowInsetsSides.Bottom),
         bottomBar = {
-            LazyPizzaBottomBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
-                navItems,
-                selectedItem = selectedNavItem,
-                onItemSelected = onItemSelected
-            )
+            AnimatedVisibility(
+                visible = showBottomBar, enter = slideInVertically(
+                    initialOffsetY = { it },
+                    animationSpec = tween(300)
+                ), exit = slideOutVertically(
+                    targetOffsetY = { it },
+                    animationSpec = tween(300)
+                )
+            ) {
+                LazyPizzaBottomBar(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
+                    navItems,
+                    selectedItem = selectedNavItem,
+                    onItemSelected = onItemSelected
+                )
+            }
         }) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             LazyPizzaNavHost(
@@ -135,9 +154,15 @@ private fun LazyPizzaNavHost(navController: NavHostController, modifier: Modifie
 
         composable<Route.PizzaDetail> { backStackEntry ->
             val route = backStackEntry.toRoute<Route.PizzaDetail>()
-            PizzaDetailScreen(id = route.id, onBack = {
-                navController.navigateUp()
-            })
+            PizzaDetailScreen(
+                id = route.id, onBack = {
+                    navController.navigateUp()
+                },
+                openCartScreen = {
+                    navController.navigate(Route.Cart) {
+                        popUpTo(0)
+                    }
+                })
         }
 
         composable<Route.Cart> {

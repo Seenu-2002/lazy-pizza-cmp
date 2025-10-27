@@ -1,7 +1,7 @@
 package com.seenu.dev.android.lazypizza.presentation.state
 
 data class ToppingUiModel constructor(
-    val id: Long,
+    val id: String,
     val name: String,
     val price: Double,
     val imageUrl: String,

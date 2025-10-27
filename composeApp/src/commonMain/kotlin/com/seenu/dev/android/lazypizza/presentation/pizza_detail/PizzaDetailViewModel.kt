@@ -2,7 +2,6 @@ package com.seenu.dev.android.lazypizza.presentation.pizza_detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Logger.Companion.e
 import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaRepository
 import com.seenu.dev.android.lazypizza.domain.model.FoodItem
@@ -10,8 +9,11 @@ import com.seenu.dev.android.lazypizza.presentation.mappers.toUiModel
 import com.seenu.dev.android.lazypizza.presentation.state.FoodItemUiModel
 import com.seenu.dev.android.lazypizza.presentation.state.ToppingUiModel
 import com.seenu.dev.android.lazypizza.presentation.state.UiState
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -24,18 +26,25 @@ class PizzaDetailViewModel constructor(
         MutableStateFlow(UiState.Empty())
     val uiState: StateFlow<UiState<PizzaDetailUiState>> = _uiState.asStateFlow()
 
-    fun handleEvent(event: PizzaDetailEvent) {
+    private val _events: MutableSharedFlow<PizzaDetailSideEffect> = MutableSharedFlow()
+    val events: SharedFlow<PizzaDetailSideEffect> = _events.asSharedFlow()
+
+    fun handleEvent(event: PizzaDetailIntent) {
         when (event) {
-            is PizzaDetailEvent.LoadPizzaDetail -> {
+            is PizzaDetailIntent.LoadPizzaDetail -> {
                 loadPizzaDetail(event.id)
             }
 
-            is PizzaDetailEvent.AddTopping -> {
+            is PizzaDetailIntent.AddTopping -> {
                 addTopping(event.topping)
             }
 
-            is PizzaDetailEvent.RemoveTopping -> {
+            is PizzaDetailIntent.RemoveTopping -> {
                 removeTopping(event.topping)
+            }
+
+            is PizzaDetailIntent.UpdateCart -> {
+                updateCart()
             }
         }
     }
@@ -68,6 +77,13 @@ class PizzaDetailViewModel constructor(
         }
     }
 
+    private fun updateCart() {
+        viewModelScope.launch {
+            // TODO: DB integration
+            _events.emit(PizzaDetailSideEffect.OpenCart)
+        }
+    }
+
     private fun updateToppingCount(topping: ToppingUiModel, count: Int) {
         viewModelScope.launch {
             val currentState = _uiState.value
@@ -81,7 +97,7 @@ class PizzaDetailViewModel constructor(
                     _uiState.value = UiState.Success(updatedUiState)
                 }
             } else {
-                e { "Cannot update topping count when state is not Success"}
+                e { "Cannot update topping count when state is not Success" }
             }
         }
     }
@@ -99,8 +115,13 @@ data class PizzaDetailUiState constructor(
         }
 }
 
-sealed interface PizzaDetailEvent {
-    data class LoadPizzaDetail(val id: String) : PizzaDetailEvent
-    data class AddTopping(val topping: ToppingUiModel) : PizzaDetailEvent
-    data class RemoveTopping(val topping: ToppingUiModel) : PizzaDetailEvent
+sealed interface PizzaDetailIntent {
+    data class LoadPizzaDetail(val id: String) : PizzaDetailIntent
+    data class AddTopping(val topping: ToppingUiModel) : PizzaDetailIntent
+    data class RemoveTopping(val topping: ToppingUiModel) : PizzaDetailIntent
+    data object UpdateCart : PizzaDetailIntent
+}
+
+sealed interface PizzaDetailSideEffect {
+    data object OpenCart : PizzaDetailSideEffect
 }

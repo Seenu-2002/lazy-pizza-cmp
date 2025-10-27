@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Logger.Companion.e
+import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaCartRepository
 import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaRepository
 import com.seenu.dev.android.lazypizza.domain.model.FoodType
 import com.seenu.dev.android.lazypizza.presentation.mappers.toUiModel
@@ -19,7 +20,8 @@ import kotlinx.coroutines.launch
 import kotlin.math.exp
 
 class PizzaListViewModel constructor(
-    private val repository: LazyPizzaRepository
+    private val repository: LazyPizzaRepository,
+    private val cartRepository: LazyPizzaCartRepository
 ) : ViewModel() {
 
     private var items: List<FoodSection> = emptyList()
