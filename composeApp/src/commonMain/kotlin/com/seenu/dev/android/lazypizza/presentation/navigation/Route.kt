@@ -10,4 +10,10 @@ sealed interface Route {
 
     @Serializable
     data class PizzaDetail constructor(val id: String) : Route
+
+    @Serializable
+    data object Cart : Route
+
+    @Serializable
+    data object History : Route
 }

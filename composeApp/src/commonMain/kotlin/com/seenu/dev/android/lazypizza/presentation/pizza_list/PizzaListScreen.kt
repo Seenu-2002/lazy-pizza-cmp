@@ -1,6 +1,7 @@
 package com.seenu.dev.android.lazypizza.presentation.pizza_list
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -86,47 +87,45 @@ fun PizzaListScreen(
     val itemsState by viewModel.filteredItems.collectAsStateWithLifecycle()
 
     val dimensions = LocalDimensions.current.listScreen
-    Scaffold(
+    Column(
         modifier = Modifier
-            .fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                modifier = Modifier.padding(end = 16.dp),
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Image(
-                            painter = painterResource(Res.drawable.ic_pizza),
-                            contentDescription = null
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            stringResource(Res.string.app_name),
-                            style = MaterialTheme.typography.body3Bold
-                        )
-                    }
-                },
-                actions = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_phone),
-                            contentDescription = null,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("+1 (555) 321-7890", style = MaterialTheme.typography.body1Regular)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+    ) {
+        TopAppBar(
+            modifier = Modifier.padding(end = 16.dp),
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        painter = painterResource(Res.drawable.ic_pizza),
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        stringResource(Res.string.app_name),
+                        style = MaterialTheme.typography.body3Bold
+                    )
+                }
+            },
+            actions = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_phone),
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("+1 (555) 321-7890", style = MaterialTheme.typography.body1Regular)
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.background
             )
-        },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { innerPadding ->
+        )
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+                .fillMaxWidth()
+                .weight(1F)
         ) {
             Column(
                 modifier = Modifier

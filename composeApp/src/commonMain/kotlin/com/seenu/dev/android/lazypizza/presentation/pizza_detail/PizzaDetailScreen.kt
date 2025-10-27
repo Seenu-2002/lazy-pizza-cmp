@@ -94,45 +94,45 @@ fun PizzaDetailScreen(id: String, onBack: () -> Unit) {
         }
     }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = {
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.background)
+    ) {
+        TopAppBar(
+            title = {
 
-                }, navigationIcon = {
-                    Box(
-                        modifier = Modifier.size(44.dp)
-                            .padding(4.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.textSecondary8,
-                                shape = CircleShape
-                            ).clickable(
-                                onClick = onBack,
-                                role = Role.Button,
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = ripple(bounded = false),
-                            ).semantics {
-                                role = Role.Button
-                            },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_back),
-                            contentDescription = "Back to Pizza list screen",
-                            tint = MaterialTheme.colorScheme.textSecondary
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
+            }, navigationIcon = {
+                Box(
+                    modifier = Modifier.size(44.dp)
+                        .padding(4.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.textSecondary8,
+                            shape = CircleShape
+                        ).clickable(
+                            onClick = onBack,
+                            role = Role.Button,
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple(bounded = false),
+                        ).semantics {
+                            role = Role.Button
+                        },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_back),
+                        contentDescription = "Back to Pizza list screen",
+                        tint = MaterialTheme.colorScheme.textSecondary
+                    )
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.background
             )
-        },
-        containerColor = MaterialTheme.colorScheme.background,
-    ) { innerPadding ->
+        )
         Box(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1F),
             contentAlignment = Alignment.Center
         ) {
             when (val state = uiState) {
