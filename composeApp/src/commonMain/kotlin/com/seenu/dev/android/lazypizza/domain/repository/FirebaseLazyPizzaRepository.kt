@@ -33,6 +33,7 @@ class FirebaseLazyPizzaRepository constructor() : LazyPizzaRepository {
                 .document(id)
                 .get()
                 .data<FoodItemDto>()
+                .copy(id = id)
                 .toDomain()
         }
     }

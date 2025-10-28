@@ -59,7 +59,6 @@ import com.seenu.dev.android.lazypizza.presentation.pizza_detail.PizzaDetailScre
 import com.seenu.dev.android.lazypizza.presentation.pizza_list.PizzaListScreen
 import com.seenu.dev.android.lazypizza.presentation.theme.LazyPizzaTheme
 import com.seenu.dev.android.lazypizza.presentation.theme.surfaceHigher
-import com.seenu.dev.android.lazypizza.presentation.theme.title4
 import lazypizza.composeapp.generated.resources.Res
 import lazypizza.composeapp.generated.resources.ic_cart
 import lazypizza.composeapp.generated.resources.ic_history

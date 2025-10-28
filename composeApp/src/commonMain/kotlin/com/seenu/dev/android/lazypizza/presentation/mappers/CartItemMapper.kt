@@ -7,7 +7,7 @@ fun CartItem.toUiModel(): CartItemUiModel {
     val foodItemUiModel = foodItemWithCount.foodItem.toUiModel(countInCart = foodItemWithCount.count)
     val toppingsUiModel = toppingsWithCount.map { it.topping.toUiModel(countInCart = it.count) }
     return CartItemUiModel(
-        foodItemUiModel = foodItemUiModel,
-        toppingsUiModel = toppingsUiModel
+        foodItem = foodItemUiModel,
+        toppings = toppingsUiModel
     )
 }

@@ -9,8 +9,8 @@ data class FoodItem constructor(
     val imageUrl: String,
 )
 
-enum class FoodType {
-    PIZZA, DRINK, SAUCE, ICE_CREAM
+enum class FoodType(val sortOrder: Int) {
+    PIZZA(1), DRINK(2), SAUCE(4), ICE_CREAM(3)
 }
 
 data class FoodItemWithCount(

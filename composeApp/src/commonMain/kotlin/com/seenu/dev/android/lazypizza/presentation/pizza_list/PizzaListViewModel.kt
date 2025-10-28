@@ -6,8 +6,12 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Logger.Companion.e
 import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaCartRepository
 import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaRepository
+import com.seenu.dev.android.lazypizza.domain.model.CartItem
+import com.seenu.dev.android.lazypizza.domain.model.FoodItemWithCount
 import com.seenu.dev.android.lazypizza.domain.model.FoodType
+import com.seenu.dev.android.lazypizza.presentation.mappers.toDomain
 import com.seenu.dev.android.lazypizza.presentation.mappers.toUiModel
+import com.seenu.dev.android.lazypizza.presentation.state.FoodItemUiModel
 import com.seenu.dev.android.lazypizza.presentation.state.FoodSection
 import com.seenu.dev.android.lazypizza.presentation.state.UiState
 import kotlinx.coroutines.delay
@@ -100,6 +104,7 @@ class PizzaListViewModel constructor(
                     if (item != null) {
                         isItemFound = true
                         val newItem = item.copy(countInCart = count)
+                        updateCart(item, item.countInCart, count)
                         val newItems = section.items.map {
                             if (item.id == it.id) newItem else it
                         }
@@ -117,6 +122,25 @@ class PizzaListViewModel constructor(
             } ?: e { "Previous state is not Success. Instead found: ${filteredItems.value}" }
         }
     }
+
+    private fun updateCart(item: FoodItemUiModel, oldCount: Int, newCount: Int) {
+        viewModelScope.launch {
+            val cartItem = CartItem(
+                foodItemWithCount = FoodItemWithCount(
+                    foodItem = item.toDomain(),
+                    count = newCount
+                )
+            )
+            if (newCount == 0) {
+                cartRepository.removeItemFromCart(item.id)
+            } else if (oldCount == 0 && newCount > 0) {
+                cartRepository.addItemToCart(cartItem)
+            } else {
+                cartRepository.updateItemInCart(cartItem)
+            }
+        }
+    }
+
 
     private fun updateSearchQuery(query: String) {
         val newSections = if (query.isBlank()) {

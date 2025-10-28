@@ -231,7 +231,7 @@ fun PizzaDetailContent(
                 style = MaterialTheme.typography.title1SemiBold,
                 modifier = Modifier.fillMaxWidth()
             )
-            data.ingredients?.let { ingredients ->
+            data.ingredientsFormatted?.let { ingredients ->
                 Text(
                     text = ingredients,
                     style = MaterialTheme.typography.body3Regular,

@@ -10,6 +10,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,12 +45,17 @@ private fun OrderHistoryScreenPreview() {
 @Composable
 fun OrderHistoryScreen() {
     Column(modifier = Modifier.fillMaxSize()) {
-        CenterAlignedTopAppBar(title = {
-            Text(
-                text = stringResource(Res.string.order_history),
-                style = MaterialTheme.typography.body1Medium
+        CenterAlignedTopAppBar(
+            title = {
+                Text(
+                    text = stringResource(Res.string.order_history),
+                    style = MaterialTheme.typography.body1Medium
+                )
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.background
             )
-        })
+        )
 
         Spacer(modifier = Modifier.height(120.dp))
         LazyPizzaInfoCard(

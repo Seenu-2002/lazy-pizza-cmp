@@ -24,8 +24,8 @@ class LazyPizzaModule {
         PizzaListViewModel(repository, cartRepository)
 
     @KoinViewModel
-    fun pizzaDetailViewModel(repository: LazyPizzaRepository): PizzaDetailViewModel =
-        PizzaDetailViewModel(repository)
+    fun pizzaDetailViewModel(repository: LazyPizzaRepository, cartRepository: LazyPizzaCartRepository): PizzaDetailViewModel =
+        PizzaDetailViewModel(repository, cartRepository)
 
     @KoinViewModel
     fun pizzaCartViewModel(repository: LazyPizzaCartRepository): PizzaCartViewModel =

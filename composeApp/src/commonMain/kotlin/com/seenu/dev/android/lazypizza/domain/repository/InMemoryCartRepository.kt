@@ -3,6 +3,8 @@ package com.seenu.dev.android.lazypizza.domain.repository
 import co.touchlab.kermit.Logger
 import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaCartRepository
 import com.seenu.dev.android.lazypizza.domain.model.CartItem
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 class InMemoryCartRepository : LazyPizzaCartRepository {
 
@@ -35,6 +37,16 @@ class InMemoryCartRepository : LazyPizzaCartRepository {
             cartItems[index] = updatedItem
         } else {
             cartItems.add(item)
+        }
+    }
+
+    override suspend fun updateItemInCart(item: CartItem) {
+        Logger.d { ":: updateItemInCart" }
+        val existingItem =
+            cartItems.find { it.foodItemWithCount.foodItem.id == item.foodItemWithCount.foodItem.id }
+        if (existingItem != null) {
+            val index = cartItems.indexOf(existingItem)
+            cartItems[index] = item
         }
     }
 

@@ -3,8 +3,13 @@ package com.seenu.dev.android.lazypizza.presentation.pizza_detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger.Companion.e
+import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaCartRepository
 import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaRepository
+import com.seenu.dev.android.lazypizza.domain.model.CartItem
 import com.seenu.dev.android.lazypizza.domain.model.FoodItem
+import com.seenu.dev.android.lazypizza.domain.model.FoodItemWithCount
+import com.seenu.dev.android.lazypizza.domain.model.ToppingWithCount
+import com.seenu.dev.android.lazypizza.presentation.mappers.toDomain
 import com.seenu.dev.android.lazypizza.presentation.mappers.toUiModel
 import com.seenu.dev.android.lazypizza.presentation.state.FoodItemUiModel
 import com.seenu.dev.android.lazypizza.presentation.state.ToppingUiModel
@@ -19,7 +24,8 @@ import kotlinx.coroutines.launch
 
 
 class PizzaDetailViewModel constructor(
-    private val repository: LazyPizzaRepository
+    private val repository: LazyPizzaRepository,
+    private val cartRepository: LazyPizzaCartRepository
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<UiState<PizzaDetailUiState>> =
@@ -79,7 +85,24 @@ class PizzaDetailViewModel constructor(
 
     private fun updateCart() {
         viewModelScope.launch {
-            // TODO: DB integration
+            val data = (uiState.value as? UiState.Success<PizzaDetailUiState>)?.data
+                ?: return@launch
+
+            val pizza = data.pizza
+            val toppingsInCart = data.toppings.filter { it.countInCart > 0 }
+            val cartItem = CartItem(
+                foodItemWithCount = FoodItemWithCount(
+                    foodItem = pizza.toDomain(),
+                    count = 1
+                ),
+                toppingsWithCount = toppingsInCart.map {
+                    ToppingWithCount(
+                        topping = it.toDomain(),
+                        count = it.countInCart
+                    )
+                }
+            )
+            cartRepository.addItemToCart(cartItem)
             _events.emit(PizzaDetailSideEffect.OpenCart)
         }
     }
