@@ -24,8 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.seenu.dev.android.lazypizza.LocalCurrencyFormatter
 import com.seenu.dev.android.lazypizza.presentation.design_system.CartItemCard
 import com.seenu.dev.android.lazypizza.presentation.design_system.LazyPizzaInfoCard
 import com.seenu.dev.android.lazypizza.presentation.design_system.LazyPizzaTextButton
@@ -36,8 +36,8 @@ import com.seenu.dev.android.lazypizza.presentation.theme.body1Medium
 import com.seenu.dev.android.lazypizza.presentation.theme.body3Regular
 import com.seenu.dev.android.lazypizza.presentation.theme.textPrimary
 import com.seenu.dev.android.lazypizza.presentation.theme.textSecondary
-import com.seenu.dev.android.lazypizza.presentation.theme.title2
 import com.seenu.dev.android.lazypizza.presentation.theme.title3
+import com.seenu.dev.android.lazypizza.presentation.utils.roundTo2Digits
 import lazypizza.composeapp.generated.resources.Res
 import lazypizza.composeapp.generated.resources.back_to_menu
 import lazypizza.composeapp.generated.resources.cart
@@ -157,13 +157,14 @@ fun CartItemList(
             .padding(bottom = 16.dp)
     ) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             items(items, key = {
                 it.foodItem.id
             }) { cartItem ->
                 CartItemCard(
                     modifier = Modifier
+                        .animateItem()
                         .fillMaxWidth()
                         .padding(bottom = 8.dp),
                     item = cartItem,
@@ -206,8 +207,10 @@ fun CartItemList(
                 onClick = onCheckout,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                val currencyFormatter = LocalCurrencyFormatter.current
+                val formattedTotal = currencyFormatter.format(cartTotal.roundTo2Digits())
                 Text(
-                    text = stringResource(Res.string.proceed_to_checkout, cartTotal),
+                    text = stringResource(Res.string.proceed_to_checkout, formattedTotal),
                     style = MaterialTheme.typography.title3,
                     color = MaterialTheme.colorScheme.onPrimary
                 )

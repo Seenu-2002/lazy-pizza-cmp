@@ -38,7 +38,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.seenu.dev.android.lazypizza.LocalDimensions
-import com.seenu.dev.android.lazypizza.di.LazyPizzaModule
+import com.seenu.dev.android.lazypizza.di.lazyPizzaModule
 import com.seenu.dev.android.lazypizza.domain.model.FoodType
 import com.seenu.dev.android.lazypizza.presentation.design_system.FoodFilterChip
 import com.seenu.dev.android.lazypizza.presentation.design_system.FoodPreviewItemCard
@@ -63,13 +63,12 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinApplication
 import org.koin.compose.viewmodel.koinViewModel
-import org.koin.ksp.generated.module
 
 @Preview
 @Composable
 private fun PizzaListScreenPreview() {
     KoinApplication(application = {
-        modules(LazyPizzaModule().module)
+        modules(lazyPizzaModule)
     }) {
         LazyPizzaTheme {
             PizzaListScreen()

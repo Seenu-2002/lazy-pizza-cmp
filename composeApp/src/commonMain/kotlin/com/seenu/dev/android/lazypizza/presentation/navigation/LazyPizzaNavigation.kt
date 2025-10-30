@@ -185,7 +185,7 @@ private fun LazyPizzaBottomBarPreview() {
         LazyPizzaBottomBar(
             items = listOf(
                 NavItem.PizzaListItem,
-                NavItem.CartItem,
+                NavItem.CartItem(9),
                 NavItem.HistoryItem
             ),
             selectedItem = NavItem.PizzaListItem
@@ -197,6 +197,7 @@ sealed class NavItem {
     abstract val route: Route
     abstract val iconRes: DrawableResource
     abstract val titleRes: StringResource
+    open val badgeCount: Int? = null
 
     data object PizzaListItem : NavItem() {
         override val route: Route = Route.PizzaList
@@ -204,7 +205,9 @@ sealed class NavItem {
         override val titleRes: StringResource = Res.string.nav_menu
     }
 
-    data object CartItem : NavItem() {
+    data class CartItem constructor(
+        override val badgeCount: Int? = null
+    ) : NavItem() {
         override val route: Route = Route.Cart
         override val iconRes: DrawableResource = Res.drawable.ic_cart
         override val titleRes: StringResource = Res.string.nav_cart
@@ -250,6 +253,7 @@ fun LazyPizzaBottomBar(
                     .padding(10.dp)
                     .wrapContentHeight()
                     .weight(1F),
+                badgeCount = item.badgeCount,
                 selected = item == selectedItem,
                 onClick = { onItemSelected(item) },
                 icon = painterResource(item.iconRes),

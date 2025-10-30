@@ -3,6 +3,8 @@ package com.seenu.dev.android.lazypizza.presentation.cart
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaCartRepository
+import com.seenu.dev.android.lazypizza.domain.model.CartItem
+import com.seenu.dev.android.lazypizza.presentation.mappers.toDomain
 import com.seenu.dev.android.lazypizza.presentation.mappers.toUiModel
 import com.seenu.dev.android.lazypizza.presentation.state.CartItemUiModel
 import com.seenu.dev.android.lazypizza.presentation.state.UiState
@@ -13,7 +15,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class PizzaCartViewModel constructor(
-    private val repository: LazyPizzaCartRepository
+    private val repository: LazyPizzaCartRepository,
+    private val cartRepository: LazyPizzaCartRepository
 ) : ViewModel() {
 
     private val _cart: MutableStateFlow<UiState<CartUiState>> = MutableStateFlow(UiState.Empty())
@@ -26,11 +29,12 @@ class PizzaCartViewModel constructor(
         viewModelScope.launch {
             when (intent) {
                 is CartIntent.GetCartItems -> {
-                    val cartItems = repository.getCartItems()
-                    _cart.value = UiState.Success(
-                        CartUiState(
-                            items = cartItems.map { it.toUiModel() }.sortedBy { it.foodItem.type.sortOrder }
-                        ))
+                    repository.getCartItemsFlow().collect { cartItems ->
+                        _cart.value = UiState.Success(
+                            CartUiState(
+                                items = cartItems.map { it.toUiModel() }.sortedBy { it.foodItem.type.sortOrder }
+                            ))
+                    }
                 }
 
                 is CartIntent.DeleteItem -> {
@@ -38,23 +42,28 @@ class PizzaCartViewModel constructor(
                         ?: return@launch
                     val updatedCart =
                         cartData.items.filterNot { it.foodItem.id == intent.itemId }
-
-                    // TODO: Update cart
-
+                    cartRepository.removeItemFromCart(itemId = intent.itemId)
                     _cart.value = UiState.Success(CartUiState(updatedCart))
                 }
 
                 is CartIntent.UpdateItemQuantity -> {
                     val cartData = (_cart.value as? UiState.Success)?.data
                         ?: return@launch
+                    var updatedItem: CartItemUiModel? = null
                     val updatedCart = cartData.items.map {
                         if (it.foodItem.id == intent.itemId) {
                             val updatedFoodItem =
                                 it.foodItem.copy(countInCart = intent.quantity)
+                            updatedItem = it.copy(foodItem = updatedFoodItem)
                             it.copy(foodItem = updatedFoodItem)
                         } else {
                             it
                         }
+                    }
+                    updatedItem?.let {
+                        cartRepository.updateItemInCart(
+                            it.toDomain()
+                        )
                     }
                     _cart.value = UiState.Success(CartUiState(updatedCart))
                 }

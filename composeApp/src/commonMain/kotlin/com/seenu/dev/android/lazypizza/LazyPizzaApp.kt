@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -19,6 +20,7 @@ import com.seenu.dev.android.lazypizza.presentation.theme.LazyPizzaTheme
 import com.seenu.dev.android.lazypizza.presentation.utils.isExpanded
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun LazyPizzaApp() {
@@ -28,13 +30,21 @@ fun LazyPizzaApp() {
         }
         val isTablet = isExpanded()
         val navController = rememberNavController()
+        val viewModel: LazyPizzaAppViewModel = koinViewModel()
 
+        val cartItemCount by viewModel.cartCount.collectAsStateWithLifecycle()
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.toRouteOrNull()
+        val cartItemNavItem by derivedStateOf {
+            Logger.d {
+                "Cart Item Count: $cartItemCount"
+            }
+            NavItem.CartItem(cartItemCount)
+        }
         val selected by derivedStateOf {
             when (currentRoute) {
                 NavItem.PizzaListItem.route -> NavItem.PizzaListItem
-                NavItem.CartItem.route -> NavItem.CartItem
+                cartItemNavItem.route -> cartItemNavItem
                 NavItem.HistoryItem.route -> NavItem.HistoryItem
                 else -> NavItem.PizzaListItem
             }
@@ -45,10 +55,10 @@ fun LazyPizzaApp() {
             }
             currentRoute !is Route.PizzaDetail
         }
-        val items = remember {
+        val items by derivedStateOf {
             listOf(
                 NavItem.PizzaListItem,
-                NavItem.CartItem,
+                cartItemNavItem,
                 NavItem.HistoryItem
             )
         }

@@ -9,6 +9,7 @@ plugins {
     kotlin("plugin.serialization")
     alias(libs.plugins.ksp)
     id("com.google.gms.google-services")
+    alias(libs.plugins.sqlDelight)
 }
 
 kotlin {
@@ -40,6 +41,9 @@ kotlin {
 
             // Firebase
             implementation(project.dependencies.platform(libs.android.firebase.bom))
+
+            // SQLDelight
+            implementation(libs.sqldelight.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -82,10 +86,16 @@ kotlin {
 
             // Firestore
             implementation(libs.gitlive.firebase.firestore)
+
+            // SQLDelight
+            implementation(libs.sqldelight.coroutines)
         }
         iosMain.dependencies {
             // Ktor
             implementation(libs.ktor.client.darwin)
+
+            // SQLDelight
+            implementation(libs.sqldelight.native)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -95,6 +105,16 @@ kotlin {
     // KSP Common sourceSet
     sourceSets.named("commonMain").configure {
         kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
+    }
+
+    sqldelight {
+        databases {
+            create("LazyPizzaDatabase") {
+                packageName = "com.seenu.dev.android.lazypizza"
+                schemaOutputDirectory = file("src/main/sqldelight/databases")
+                migrationOutputDirectory = file("src/main/sqldelight/migrations")
+            }
+        }
     }
 }
 

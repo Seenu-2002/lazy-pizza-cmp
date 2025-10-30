@@ -16,7 +16,6 @@ import kotlinx.serialization.json.Json
 class FirebaseLazyPizzaRepository constructor() : LazyPizzaRepository {
 
     private val firestore = Firebase.firestore
-    val json = Json { ignoreUnknownKeys = true }
 
     override suspend fun getFoodItems(): List<FoodItem> {
         return withContext(Dispatchers.IO) {

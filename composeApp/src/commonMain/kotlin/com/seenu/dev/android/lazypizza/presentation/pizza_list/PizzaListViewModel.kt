@@ -2,7 +2,6 @@ package com.seenu.dev.android.lazypizza.presentation.pizza_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Logger.Companion.e
 import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaCartRepository
 import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaRepository
@@ -14,14 +13,12 @@ import com.seenu.dev.android.lazypizza.presentation.mappers.toUiModel
 import com.seenu.dev.android.lazypizza.presentation.state.FoodItemUiModel
 import com.seenu.dev.android.lazypizza.presentation.state.FoodSection
 import com.seenu.dev.android.lazypizza.presentation.state.UiState
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.math.exp
 
 class PizzaListViewModel constructor(
     private val repository: LazyPizzaRepository,
@@ -61,26 +58,26 @@ class PizzaListViewModel constructor(
             _filteredItems.value = UiState.Loading()
             items = emptyList()
             try {
-                delay((100..500L).random())
-                val sections = repository.getFoodItems()
-                    .groupBy { it.type }
-                    .map {
-                        FoodSection(
-                            type = it.key,
-                            items = it.value.map { item ->
-                                item.toUiModel()
-                            }
+                cartRepository.getCartItemsFlow().collect { cartItems ->
+                    val cartItemsMap = cartItems.associate { item -> item.foodItemWithCount.foodItem.id to item.foodItemWithCount.count }
+                    val sections = repository.getFoodItems()
+                        .groupBy { it.type }
+                        .map {
+                            FoodSection(
+                                type = it.key,
+                                items = it.value.map { item ->
+                                    item.toUiModel(cartItemsMap[item.id] ?: 0)
+                                }
+                            )
+                        }.sortedBy { it.type.ordinal }
+                    val filters = sections.map { it.type }
+                    _filteredItems.value = UiState.Success(
+                        FoodListUiState(
+                            sections = sections,
+                            filters = filters
                         )
-                    }.sortedBy { it.type.ordinal }
-
-                items = sections
-                val filters = sections.map { it.type }
-                _filteredItems.value = UiState.Success(
-                    FoodListUiState(
-                        sections = sections,
-                        filters = filters
                     )
-                )
+                }
             } catch (exp: Exception) {
                 e(exp) { "Error fetching food items: ${exp.message}" }
                 _filteredItems.value =
