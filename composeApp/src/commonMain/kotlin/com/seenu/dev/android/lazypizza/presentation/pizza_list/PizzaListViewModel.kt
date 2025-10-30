@@ -70,6 +70,8 @@ class PizzaListViewModel constructor(
                                 }
                             )
                         }.sortedBy { it.type.ordinal }
+
+                    _items = sections
                     val filters = sections.map { it.type }
                     _filteredItems.value = UiState.Success(
                         FoodListUiState(

@@ -9,17 +9,22 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOut
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,8 +38,10 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
@@ -121,14 +128,37 @@ fun LazyPizzaNavigationTablet(
     onItemSelected: (NavItem) -> Unit = {}
 ) {
     Scaffold(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        contentWindowInsets = WindowInsets.systemBars.only(WindowInsetsSides.Bottom),
     ) { innerPadding ->
         Row(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            NavigationRail { }
+            Column(modifier = Modifier
+                .width(78.dp)
+                .fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                for (item in navItems) {
+                    LazyPizzaNavBarItem(
+                        selectedNavItem == item,
+                        onClick = {
+                            onItemSelected(item)
+                        },
+                        icon = painterResource(item.iconRes),
+                        label = stringResource(item.titleRes),
+                        badgeCount = item.badgeCount,
+                        modifier = Modifier
+                    )
+                }
+            }
+
+            val insets = WindowInsets.statusBars.asPaddingValues()
+            VerticalDivider(
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.padding(top = insets.calculateTopPadding())
+            )
             LazyPizzaNavHost(
                 navController = navController,
                 modifier = Modifier.fillMaxHeight().weight(1F),

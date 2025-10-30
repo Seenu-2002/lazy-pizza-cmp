@@ -25,8 +25,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -131,6 +136,15 @@ fun CartItemCard(
     }
     Row(
         modifier = modifier
+            .dropShadow(
+                shape = shape,
+                shadow = androidx.compose.ui.graphics.shadow.Shadow(
+                    radius = 16.dp,
+                    spread = 0.dp,
+                    color = Color(0x0F03131F),
+                    offset = DpOffset(x = 0.dp, (-4).dp)
+                )
+            )
             .clip(shape)
             .background(
                 shape = shape,

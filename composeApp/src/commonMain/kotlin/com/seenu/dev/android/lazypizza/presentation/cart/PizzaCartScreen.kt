@@ -4,15 +4,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,7 +28,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.seenu.dev.android.lazypizza.LocalCurrencyFormatter
@@ -39,10 +46,11 @@ import com.seenu.dev.android.lazypizza.presentation.theme.LazyPizzaTheme
 import com.seenu.dev.android.lazypizza.presentation.theme.body1Medium
 import com.seenu.dev.android.lazypizza.presentation.theme.body3Regular
 import com.seenu.dev.android.lazypizza.presentation.theme.label2Semibold
+import com.seenu.dev.android.lazypizza.presentation.theme.surfaceHigher
 import com.seenu.dev.android.lazypizza.presentation.theme.textPrimary
 import com.seenu.dev.android.lazypizza.presentation.theme.textSecondary
 import com.seenu.dev.android.lazypizza.presentation.theme.title3
-import com.seenu.dev.android.lazypizza.presentation.utils.getStringRes
+import com.seenu.dev.android.lazypizza.presentation.utils.isExpanded
 import com.seenu.dev.android.lazypizza.presentation.utils.roundTo2Digits
 import lazypizza.composeapp.generated.resources.Res
 import lazypizza.composeapp.generated.resources.back_to_menu
@@ -54,7 +62,6 @@ import lazypizza.composeapp.generated.resources.recommended_items
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.text.Typography.section
 
 @Preview
 @Composable
@@ -107,31 +114,84 @@ fun PizzaCartScreen(onBackToMenu: () -> Unit) {
             is UiState.Success -> {
                 val cart = (cartState as UiState.Success).data
                 if (cart.items.isNotEmpty()) {
-                    CartItemList(
+                    PizzaCartContainer(
                         modifier = Modifier.fillMaxWidth(),
-                        items = cart.items,
-                        suggestions = cart.suggestions,
-                        cartTotal = cart.total,
-                        onAddToCart = { item ->
-                            viewModel.onIntent(CartIntent.AddItem(item))
+
+                        checkoutButton = {
+                            Column(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .offset(y = 4.dp)
+                                        .height(20.dp)
+                                        .background(
+                                            brush = Brush.verticalGradient(
+                                                colors = listOf(
+                                                    MaterialTheme.colorScheme.background.copy(alpha = 0.0F),
+                                                    MaterialTheme.colorScheme.background.copy(alpha = 0.75F),
+                                                )
+                                            )
+                                        )
+                                )
+                                LazyPizzaTextButton(
+                                    onClick = {
+                                        // TODO: Checkout action
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    val currencyFormatter = LocalCurrencyFormatter.current
+                                    val formattedTotal =
+                                        currencyFormatter.format(cart.total.roundTo2Digits())
+                                    Text(
+                                        text = stringResource(
+                                            Res.string.proceed_to_checkout,
+                                            formattedTotal
+                                        ),
+                                        style = MaterialTheme.typography.title3,
+                                        color = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                }
+                            }
                         },
-                        onIncreaseQuantity = { foodItem ->
-                            val intent = CartIntent.UpdateItemQuantity(
-                                itemId = foodItem.foodItem.id,
-                                quantity = foodItem.foodItem.countInCart + 1
+                        cartItems = { extraContent, checkoutButton ->
+                            CartItemList(
+                                modifier = Modifier.fillMaxWidth(),
+                                items = cart.items,
+                                extraContent = extraContent,
+                                checkoutButton = checkoutButton,
+                                onIncreaseQuantity = { foodItem ->
+                                    val intent = CartIntent.UpdateItemQuantity(
+                                        itemId = foodItem.foodItem.id,
+                                        quantity = foodItem.foodItem.countInCart + 1
+                                    )
+                                    viewModel.onIntent(intent)
+                                },
+                                onDecreaseQuantity = { foodItem ->
+                                    val intent = CartIntent.UpdateItemQuantity(
+                                        itemId = foodItem.foodItem.id,
+                                        quantity = (foodItem.foodItem.countInCart - 1).coerceAtLeast(
+                                            1
+                                        )
+                                    )
+                                    viewModel.onIntent(intent)
+                                },
+                                onRemove = { foodItem ->
+                                    val intent =
+                                        CartIntent.DeleteItem(itemId = foodItem.foodItem.id)
+                                    viewModel.onIntent(intent)
+                                })
+                        },
+                        suggestions = {
+                            SuggestionRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                suggestions = cart.suggestions,
+                                onAddToCart = {
+                                    val intent = CartIntent.AddItem(item = it)
+                                    viewModel.onIntent(intent)
+                                }
                             )
-                            viewModel.onIntent(intent)
-                        },
-                        onDecreaseQuantity = { foodItem ->
-                            val intent = CartIntent.UpdateItemQuantity(
-                                itemId = foodItem.foodItem.id,
-                                quantity = (foodItem.foodItem.countInCart - 1).coerceAtLeast(1)
-                            )
-                            viewModel.onIntent(intent)
-                        },
-                        onRemove = { foodItem ->
-                            val intent = CartIntent.DeleteItem(itemId = foodItem.foodItem.id)
-                            viewModel.onIntent(intent)
                         })
                 } else {
                     Spacer(modifier = Modifier.height(120.dp))
@@ -157,13 +217,11 @@ fun PizzaCartScreen(onBackToMenu: () -> Unit) {
 fun CartItemList(
     modifier: Modifier = Modifier,
     items: List<CartItemUiModel>,
-    suggestions: List<FoodItemUiModel>,
-    cartTotal: Double,
-    onAddToCart: (FoodItemUiModel) -> Unit = {},
     onIncreaseQuantity: (CartItemUiModel) -> Unit = {},
     onDecreaseQuantity: (CartItemUiModel) -> Unit = {},
     onRemove: (CartItemUiModel) -> Unit = {},
-    onCheckout: () -> Unit = {}
+    checkoutButton: @Composable (() -> Unit)? = null,
+    extraContent: (LazyListScope.() -> Unit)? = null
 ) {
     Box(
         modifier = modifier
@@ -171,7 +229,8 @@ fun CartItemList(
             .padding(bottom = 16.dp)
     ) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize()
+                .padding(vertical = 8.dp),
         ) {
             items(items, key = {
                 it.foodItem.id
@@ -194,62 +253,17 @@ fun CartItemList(
                 )
             }
 
-            item {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = stringResource(Res.string.recommended_items)
-                            .uppercase(),
-                        style = MaterialTheme.typography.label2Semibold,
-                        color = MaterialTheme.colorScheme.textSecondary,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                    )
-                }
-            }
-
-            item {
-                SuggestionRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    suggestions = suggestions,
-                    onAddToCart = onAddToCart
-                )
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(52.dp))
+            if (extraContent != null) {
+                extraContent()
             }
         }
 
-        Column(
-            modifier = Modifier.fillMaxWidth()
-                .align(Alignment.BottomCenter)
-        ) {
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .offset(y = 4.dp)
-                    .height(20.dp)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.background.copy(alpha = 0.0F),
-                                MaterialTheme.colorScheme.background.copy(alpha = 0.75F),
-                            )
-                        )
-                    )
-            )
-            LazyPizzaTextButton(
-                onClick = onCheckout,
+        if (checkoutButton != null) {
+            Box(
                 modifier = Modifier.fillMaxWidth()
+                    .align(Alignment.BottomCenter)
             ) {
-                val currencyFormatter = LocalCurrencyFormatter.current
-                val formattedTotal = currencyFormatter.format(cartTotal.roundTo2Digits())
-                Text(
-                    text = stringResource(Res.string.proceed_to_checkout, formattedTotal),
-                    style = MaterialTheme.typography.title3,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
+                checkoutButton()
             }
         }
     }
@@ -281,4 +295,85 @@ fun EmptyCartCard(onBackToMenu: () -> Unit, modifier: Modifier = Modifier) {
         onActionClick = onBackToMenu,
         modifier = modifier
     )
+}
+
+@Composable
+fun PizzaCartContainer(
+    modifier: Modifier = Modifier,
+    cartItems: @Composable (extraContent: (LazyListScope.() -> Unit)?, checkoutButton: @Composable (() -> Unit)?) -> Unit,
+    suggestions: @Composable () -> Unit,
+    checkoutButton: @Composable () -> Unit,
+) {
+    if (isExpanded()) {
+
+        Row(modifier = modifier) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f)
+                    .padding(horizontal = 8.dp)
+            ) {
+                cartItems(null, null)
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f)
+                    .padding(horizontal = 8.dp)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                        .dropShadow(
+                            shape = MaterialTheme.shapes.medium,
+                            shadow = androidx.compose.ui.graphics.shadow.Shadow(
+                                radius = 16.dp,
+                                spread = 0.dp,
+                                color = Color(0x0A03131F),
+                                offset = DpOffset(x = 0.dp, (-4).dp)
+                            )
+                        )
+                        .background(
+                            color = MaterialTheme.colorScheme.surfaceHigher,
+                            shape = MaterialTheme.shapes.medium
+                        )
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = stringResource(Res.string.recommended_items)
+                            .uppercase(),
+                        style = MaterialTheme.typography.label2Semibold,
+                        color = MaterialTheme.colorScheme.textSecondary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    )
+                    suggestions()
+                    Spacer(modifier = Modifier.height(20.dp))
+                    checkoutButton()
+                }
+            }
+        }
+    } else {
+        cartItems({
+            item {
+                Text(
+                    text = stringResource(Res.string.recommended_items)
+                        .uppercase(),
+                    style = MaterialTheme.typography.label2Semibold,
+                    color = MaterialTheme.colorScheme.textSecondary,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                )
+            }
+
+            item {
+                suggestions()
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(52.dp))
+            }
+        }, checkoutButton)
+    }
 }

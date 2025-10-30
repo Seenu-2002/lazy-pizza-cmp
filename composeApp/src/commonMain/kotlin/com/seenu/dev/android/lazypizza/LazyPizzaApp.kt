@@ -36,9 +36,6 @@ fun LazyPizzaApp() {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.toRouteOrNull()
         val cartItemNavItem by derivedStateOf {
-            Logger.d {
-                "Cart Item Count: $cartItemCount"
-            }
             NavItem.CartItem(cartItemCount)
         }
         val selected by derivedStateOf {
@@ -50,9 +47,6 @@ fun LazyPizzaApp() {
             }
         }
         val showNavBar by derivedStateOf {
-            Logger.e {
-                "Current Route: $currentRoute"
-            }
             currentRoute !is Route.PizzaDetail
         }
         val items by derivedStateOf {

@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.seenu.dev.android.lazypizza.LocalDimensions
 import com.seenu.dev.android.lazypizza.presentation.theme.primary8
 import com.seenu.dev.android.lazypizza.presentation.theme.textPrimary
 import com.seenu.dev.android.lazypizza.presentation.theme.textSecondary
@@ -55,6 +56,7 @@ fun LazyPizzaNavBarItem(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val dimensions = LocalDimensions.current.navBar
         val iconModifier: Modifier
         val tint: Color
         val labelColor: Color
@@ -121,8 +123,13 @@ fun LazyPizzaNavBarItem(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(2.dp))
-        Text(text = label, style = MaterialTheme.typography.title4, color = labelColor)
+        Spacer(modifier = Modifier.height(dimensions.iconLabelSpacing))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.title4,
+            color = labelColor,
+            textAlign = TextAlign.Center
+        )
     }
 
 }

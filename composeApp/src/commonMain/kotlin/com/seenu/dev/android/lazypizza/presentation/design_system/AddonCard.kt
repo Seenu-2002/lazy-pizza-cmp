@@ -25,6 +25,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.seenu.dev.android.lazypizza.LocalCurrencyFormatter
@@ -110,6 +113,15 @@ fun AddOnCard(
     val shape = MaterialTheme.shapes.medium
     Column(
         modifier = modifier.width(IntrinsicSize.Max)
+            .dropShadow(
+                shape = shape,
+                shadow = androidx.compose.ui.graphics.shadow.Shadow(
+                    radius = 16.dp,
+                    spread = 0.dp,
+                    color = Color(0x0F03131F),
+                    offset = DpOffset(x = 0.dp, (4).dp)
+                )
+            )
             .clip(shape)
             .background(color = MaterialTheme.colorScheme.surfaceHigher, shape = shape)
     ) {

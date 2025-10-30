@@ -2,6 +2,7 @@ package com.seenu.dev.android.lazypizza.presentation.pizza_list
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -244,6 +245,7 @@ fun FoodListContent(
         LazyVerticalGrid(
             state = gridState,
             columns = GridCells.Fixed(dimensions.gridCount),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = modifier
                 .padding(top = 4.dp),
         ) {
