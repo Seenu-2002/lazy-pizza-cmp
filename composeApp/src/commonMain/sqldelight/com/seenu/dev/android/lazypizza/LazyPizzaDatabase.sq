@@ -55,7 +55,10 @@ deleteCartFoodItemToppingsByFoodItemId:
 DELETE FROM cart_food_item__topping WHERE food_item_id = ?;
 
 getAllCartFoodItemToppings:
-SELECT * FROM cart_food_item__topping;
+SELECT cfit.*
+FROM cart_food_item__topping AS cfit
+LEFT JOIN cart_food_item AS cfi ON 1=1 -- Dummy join to trigger re-emission
+LEFT JOIN cart_topping AS ct ON 1=1;  -- Dummy join to trigger re-emission
 
 getToppingsForFoodItemWithCount:
 SELECT t.*, cft.topping_quantity FROM cart_topping t

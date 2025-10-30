@@ -25,7 +25,7 @@ class PizzaListViewModel constructor(
     private val cartRepository: LazyPizzaCartRepository
 ) : ViewModel() {
 
-    private var items: List<FoodSection> = emptyList()
+    private var _items: List<FoodSection> = emptyList()
 
     private val _filteredItems: MutableStateFlow<UiState<FoodListUiState>> =
         MutableStateFlow(UiState.Empty())
@@ -56,7 +56,7 @@ class PizzaListViewModel constructor(
     private fun getFoodItems() {
         viewModelScope.launch {
             _filteredItems.value = UiState.Loading()
-            items = emptyList()
+            _items = emptyList()
             try {
                 cartRepository.getCartItemsFlow().collect { cartItems ->
                     val cartItemsMap = cartItems.associate { item -> item.foodItemWithCount.foodItem.id to item.foodItemWithCount.count }
@@ -141,9 +141,9 @@ class PizzaListViewModel constructor(
 
     private fun updateSearchQuery(query: String) {
         val newSections = if (query.isBlank()) {
-            items
+            _items
         } else {
-            items.map { section ->
+            _items.map { section ->
                 val filteredItems =
                     section.items.filter { it.name.contains(query, ignoreCase = true) }
                 section.copy(items = filteredItems)
@@ -165,7 +165,7 @@ sealed interface PizzaListEvent {
     data class Search(val query: String) : PizzaListEvent
 }
 
-data class FoodListUiState(
+data class FoodListUiState constructor(
     val sections: List<FoodSection> = emptyList(),
     val filters: List<FoodType> = emptyList(),
     val search: String = ""

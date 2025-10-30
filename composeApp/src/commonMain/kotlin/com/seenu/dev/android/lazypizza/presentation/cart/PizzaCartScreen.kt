@@ -1,6 +1,7 @@
 package com.seenu.dev.android.lazypizza.presentation.cart
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,17 +28,21 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.seenu.dev.android.lazypizza.LocalCurrencyFormatter
+import com.seenu.dev.android.lazypizza.presentation.design_system.AddOnCard
 import com.seenu.dev.android.lazypizza.presentation.design_system.CartItemCard
 import com.seenu.dev.android.lazypizza.presentation.design_system.LazyPizzaInfoCard
 import com.seenu.dev.android.lazypizza.presentation.design_system.LazyPizzaTextButton
 import com.seenu.dev.android.lazypizza.presentation.state.CartItemUiModel
+import com.seenu.dev.android.lazypizza.presentation.state.FoodItemUiModel
 import com.seenu.dev.android.lazypizza.presentation.state.UiState
 import com.seenu.dev.android.lazypizza.presentation.theme.LazyPizzaTheme
 import com.seenu.dev.android.lazypizza.presentation.theme.body1Medium
 import com.seenu.dev.android.lazypizza.presentation.theme.body3Regular
+import com.seenu.dev.android.lazypizza.presentation.theme.label2Semibold
 import com.seenu.dev.android.lazypizza.presentation.theme.textPrimary
 import com.seenu.dev.android.lazypizza.presentation.theme.textSecondary
 import com.seenu.dev.android.lazypizza.presentation.theme.title3
+import com.seenu.dev.android.lazypizza.presentation.utils.getStringRes
 import com.seenu.dev.android.lazypizza.presentation.utils.roundTo2Digits
 import lazypizza.composeapp.generated.resources.Res
 import lazypizza.composeapp.generated.resources.back_to_menu
@@ -44,9 +50,11 @@ import lazypizza.composeapp.generated.resources.cart
 import lazypizza.composeapp.generated.resources.empty_cart
 import lazypizza.composeapp.generated.resources.empty_cart_msg
 import lazypizza.composeapp.generated.resources.proceed_to_checkout
+import lazypizza.composeapp.generated.resources.recommended_items
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.text.Typography.section
 
 @Preview
 @Composable
@@ -102,7 +110,11 @@ fun PizzaCartScreen(onBackToMenu: () -> Unit) {
                     CartItemList(
                         modifier = Modifier.fillMaxWidth(),
                         items = cart.items,
+                        suggestions = cart.suggestions,
                         cartTotal = cart.total,
+                        onAddToCart = { item ->
+                            viewModel.onIntent(CartIntent.AddItem(item))
+                        },
                         onIncreaseQuantity = { foodItem ->
                             val intent = CartIntent.UpdateItemQuantity(
                                 itemId = foodItem.foodItem.id,
@@ -145,7 +157,9 @@ fun PizzaCartScreen(onBackToMenu: () -> Unit) {
 fun CartItemList(
     modifier: Modifier = Modifier,
     items: List<CartItemUiModel>,
+    suggestions: List<FoodItemUiModel>,
     cartTotal: Double,
+    onAddToCart: (FoodItemUiModel) -> Unit = {},
     onIncreaseQuantity: (CartItemUiModel) -> Unit = {},
     onDecreaseQuantity: (CartItemUiModel) -> Unit = {},
     onRemove: (CartItemUiModel) -> Unit = {},
@@ -181,7 +195,29 @@ fun CartItemList(
             }
 
             item {
-                Spacer(modifier = Modifier.height(40.dp))
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = stringResource(Res.string.recommended_items)
+                            .uppercase(),
+                        style = MaterialTheme.typography.label2Semibold,
+                        color = MaterialTheme.colorScheme.textSecondary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    )
+                }
+            }
+
+            item {
+                SuggestionRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    suggestions = suggestions,
+                    onAddToCart = onAddToCart
+                )
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(52.dp))
             }
         }
 
@@ -215,6 +251,23 @@ fun CartItemList(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun SuggestionRow(
+    modifier: Modifier = Modifier,
+    suggestions: List<FoodItemUiModel>,
+    onAddToCart: (FoodItemUiModel) -> Unit = {}
+) {
+    LazyRow(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        items(suggestions, key = {
+            it.id
+        }) {
+            AddOnCard(modifier = Modifier.animateItem(), data = it, onClick = {
+                onAddToCart(it)
+            })
         }
     }
 }
