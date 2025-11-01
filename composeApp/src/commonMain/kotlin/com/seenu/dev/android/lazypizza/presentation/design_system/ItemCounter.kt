@@ -50,9 +50,10 @@ fun ItemCounter(
     modifier: Modifier = Modifier,
     count: Int,
     name: String,
-    max: Int,
-    onAdd: () -> Unit,
-    onRemove: () -> Unit
+    max: Int = 3,
+    min: Int = 0,
+    onAdd: () -> Unit = {},
+    onRemove: () -> Unit = {}
 ) {
     Row(
         modifier = modifier,
@@ -62,7 +63,8 @@ fun ItemCounter(
         LazyPizzaIconButton(
             onClick = onRemove,
             modifier = Modifier
-                .size(22.dp)
+                .size(22.dp),
+            enabled = count > min
         ) {
             Icon(
                 modifier = Modifier.size(14.dp),

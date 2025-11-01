@@ -1,6 +1,8 @@
 package com.seenu.dev.android.lazypizza.presentation.pizza_list
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,7 +39,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.seenu.dev.android.lazypizza.LocalDimensions
-import com.seenu.dev.android.lazypizza.di.LazyPizzaModule
+import com.seenu.dev.android.lazypizza.di.lazyPizzaModule
 import com.seenu.dev.android.lazypizza.domain.model.FoodType
 import com.seenu.dev.android.lazypizza.presentation.design_system.FoodFilterChip
 import com.seenu.dev.android.lazypizza.presentation.design_system.FoodPreviewItemCard
@@ -62,13 +64,12 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinApplication
 import org.koin.compose.viewmodel.koinViewModel
-import org.koin.ksp.generated.module
 
 @Preview
 @Composable
 private fun PizzaListScreenPreview() {
     KoinApplication(application = {
-        modules(LazyPizzaModule().module)
+        modules(lazyPizzaModule)
     }) {
         LazyPizzaTheme {
             PizzaListScreen()
@@ -79,54 +80,52 @@ private fun PizzaListScreenPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PizzaListScreen(
-    openDetailScreen: (Long) -> Unit = {},
+    openDetailScreen: (String) -> Unit = {},
     openDialer: () -> Unit = {},
 ) {
     val viewModel: PizzaListViewModel = koinViewModel()
     val itemsState by viewModel.filteredItems.collectAsStateWithLifecycle()
 
     val dimensions = LocalDimensions.current.listScreen
-    Scaffold(
+    Column(
         modifier = Modifier
-            .fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                modifier = Modifier.padding(end = 16.dp),
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Image(
-                            painter = painterResource(Res.drawable.ic_pizza),
-                            contentDescription = null
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            stringResource(Res.string.app_name),
-                            style = MaterialTheme.typography.body3Bold
-                        )
-                    }
-                },
-                actions = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_phone),
-                            contentDescription = null,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("+1 (555) 321-7890", style = MaterialTheme.typography.body1Regular)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+    ) {
+        TopAppBar(
+            modifier = Modifier.padding(end = 16.dp),
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        painter = painterResource(Res.drawable.ic_pizza),
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        stringResource(Res.string.app_name),
+                        style = MaterialTheme.typography.body3Bold
+                    )
+                }
+            },
+            actions = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_phone),
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("+1 (555) 321-7890", style = MaterialTheme.typography.body1Regular)
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.background
             )
-        },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { innerPadding ->
+        )
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+                .fillMaxWidth()
+                .weight(1F)
         ) {
             Column(
                 modifier = Modifier
@@ -246,6 +245,7 @@ fun FoodListContent(
         LazyVerticalGrid(
             state = gridState,
             columns = GridCells.Fixed(dimensions.gridCount),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = modifier
                 .padding(top = 4.dp),
         ) {

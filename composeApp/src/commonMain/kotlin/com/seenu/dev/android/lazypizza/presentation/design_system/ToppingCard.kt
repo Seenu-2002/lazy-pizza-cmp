@@ -46,7 +46,7 @@ private fun ToppingCardPreviewWithCounter() {
     LazyPizzaTheme {
         ToppingCard(
             data = ToppingUiModel(
-                id = 1L,
+                id = "1",
                 name = "Extra Cheese",
                 price = 1.5,
                 imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/chilli_wm4ain.png",
@@ -65,7 +65,7 @@ private fun ToppingCardPreview() {
     var data by remember {
         mutableStateOf(
             ToppingUiModel(
-                id = 1L,
+                id = "1",
                 name = "Extra Cheese",
                 price = 1.5,
                 imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/chilli_wm4ain.png",

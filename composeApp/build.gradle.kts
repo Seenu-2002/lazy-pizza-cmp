@@ -8,19 +8,20 @@ plugins {
     alias(libs.plugins.composeCompiler)
     kotlin("plugin.serialization")
     alias(libs.plugins.ksp)
+    id("com.google.gms.google-services")
+    alias(libs.plugins.sqlDelight)
 }
 
 kotlin {
     androidTarget {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
     
     listOf(
         iosArm64(),
         iosSimulatorArm64(),
-        iosX64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
@@ -37,6 +38,12 @@ kotlin {
 
             // Ktor
             implementation(libs.ktor.client.android)
+
+            // Firebase
+            implementation(project.dependencies.platform(libs.android.firebase.bom))
+
+            // SQLDelight
+            implementation(libs.sqldelight.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -76,10 +83,19 @@ kotlin {
 
             // Adaptive
             implementation(libs.adaptive)
+
+            // Firestore
+            implementation(libs.gitlive.firebase.firestore)
+
+            // SQLDelight
+            implementation(libs.sqldelight.coroutines)
         }
-        appleMain.dependencies {
+        iosMain.dependencies {
             // Ktor
             implementation(libs.ktor.client.darwin)
+
+            // SQLDelight
+            implementation(libs.sqldelight.native)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -89,6 +105,16 @@ kotlin {
     // KSP Common sourceSet
     sourceSets.named("commonMain").configure {
         kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
+    }
+
+    sqldelight {
+        databases {
+            create("LazyPizzaDatabase") {
+                packageName = "com.seenu.dev.android.lazypizza"
+                schemaOutputDirectory = file("src/main/sqldelight/databases")
+                migrationOutputDirectory = file("src/main/sqldelight/migrations")
+            }
+        }
     }
 }
 
@@ -114,8 +140,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
@@ -130,7 +156,6 @@ dependencies {
     // KSP Tasks
     add("kspCommonMainMetadata", libs.koin.ksp.compiler)
     add("kspAndroid", libs.koin.ksp.compiler)
-    add("kspIosX64", libs.koin.ksp.compiler)
     add("kspIosArm64", libs.koin.ksp.compiler)
     add("kspIosSimulatorArm64", libs.koin.ksp.compiler)
 }

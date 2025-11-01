@@ -25,10 +25,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.seenu.dev.android.lazypizza.LocalCurrencyFormatter
-import com.seenu.dev.android.lazypizza.presentation.state.AddonUiModel
+import com.seenu.dev.android.lazypizza.domain.model.FoodType
+import com.seenu.dev.android.lazypizza.presentation.state.FoodItemUiModel
 import com.seenu.dev.android.lazypizza.presentation.theme.LazyPizzaTheme
 import com.seenu.dev.android.lazypizza.presentation.theme.body1Regular
 import com.seenu.dev.android.lazypizza.presentation.theme.surfaceHigher
@@ -46,16 +50,19 @@ fun AddonCardWithCountPreview() {
     LazyPizzaTheme {
         var data by remember {
             mutableStateOf(
-                AddonUiModel(
-                    id = 1L,
+                FoodItemUiModel(
+                    id = "1",
                     name = "Extra Cheese",
-                    prize = 1.5,
+                    price = 1.5,
+                    type = FoodType.SAUCE,
                     imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/chilli_wm4ain.png",
-                    countInCart = 2
+                    countInCart = 2,
+                    ingredients = listOf(),
+                    ingredientsFormatted = ""
                 )
             )
         }
-        ToppingCard(
+        AddOnCard(
             modifier = Modifier.padding(8.dp),
             data = data,
             onClick = {
@@ -77,23 +84,26 @@ fun AddonCardWithCountPreview() {
 @Composable
 fun AddonCardPreview() {
     LazyPizzaTheme {
-        ToppingCard(
+        AddOnCard(
             modifier = Modifier.padding(8.dp),
-            data = AddonUiModel(
-                id = 1L,
+            data = FoodItemUiModel(
+                id = "1",
                 name = "Extra Cheese",
-                prize = 1.5,
+                price = 1.5,
+                type = FoodType.SAUCE,
                 imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595131/chilli_wm4ain.png",
-                countInCart = 0
+                countInCart = 0,
+                ingredients = listOf(),
+                ingredientsFormatted = ""
             )
         )
     }
 }
 
 @Composable
-fun ToppingCard(
+fun AddOnCard(
     modifier: Modifier = Modifier,
-    data: AddonUiModel,
+    data: FoodItemUiModel,
     maxItemCanBeAdded: Int = 3,
     onClick: () -> Unit = {},
     onAdd: () -> Unit = {},
@@ -103,6 +113,15 @@ fun ToppingCard(
     val shape = MaterialTheme.shapes.medium
     Column(
         modifier = modifier.width(IntrinsicSize.Max)
+            .dropShadow(
+                shape = shape,
+                shadow = androidx.compose.ui.graphics.shadow.Shadow(
+                    radius = 16.dp,
+                    spread = 0.dp,
+                    color = Color(0x0F03131F),
+                    offset = DpOffset(x = 0.dp, (4).dp)
+                )
+            )
             .clip(shape)
             .background(color = MaterialTheme.colorScheme.surfaceHigher, shape = shape)
     ) {
@@ -150,7 +169,7 @@ fun ToppingCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val currentFormatter = LocalCurrencyFormatter.current
-                    val priceLabel = currentFormatter.format(data.prize)
+                    val priceLabel = currentFormatter.format(data.price)
                     Text(
                         text = priceLabel,
                         style = MaterialTheme.typography.title1SemiBold,

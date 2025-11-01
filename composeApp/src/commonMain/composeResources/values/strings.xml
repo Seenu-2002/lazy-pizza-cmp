@@ -10,4 +10,22 @@
     <string name="ice_cream">Ice Cream</string>
     <string name="add_extra_toppings">Add Extra Toppings</string>
     <string name="add_to_cart_total">Add to Cart for %1$s</string>
+
+    <string name="nav_menu">Menu</string>
+    <string name="nav_cart">Cart</string>
+    <string name="nav_history">History</string>
+
+    <string name="order_history">Order History</string>
+    <string name="not_signed_in">Not Signed In</string>
+    <string name="not_signed_in_msg">Please sign in to view your order history.</string>
+    <string name="sign_in">Sign In</string>
+    <string name="cart">Cart</string>
+    <string name="empty_cart">Your Cart is Empty</string>
+    <string name="empty_cart_msg">Head back to the menu and grab a pizza you love.</string>
+    <string name="back_to_menu">Back to Menu</string>
+    <string name="topping_cart_format">%1$s x %2$s</string>
+    <string name="proceed_to_checkout">Proceed to Checkout (%1$s)</string>
+
+    <string name="recommended_items">Recommended to add to your order</string>
+
 </resources>

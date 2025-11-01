@@ -1,0 +1,84 @@
+CREATE TABLE IF NOT EXISTS cart_food_item(
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL,
+    ingredients TEXT NOT NULL,
+    price REAL NOT NULL,
+    image_url TEXT NOT NULL,
+    quantity INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS cart_topping(
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    price REAL NOT NULL,
+    image_url TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS cart_food_item__topping(
+    food_item_id TEXT NOT NULL,
+    topping_id TEXT NOT NULL,
+    topping_quantity INTEGER NOT NULL,
+    PRIMARY KEY (food_item_id, topping_id),
+    FOREIGN KEY (food_item_id) REFERENCES cart_food_item(id) ON DELETE CASCADE,
+    FOREIGN KEY (topping_id) REFERENCES cart_topping(id) ON DELETE CASCADE
+);
+
+getAllCartFoodItems:
+SELECT * FROM cart_food_item;
+
+insertCartFoodItem:
+INSERT OR REPLACE INTO cart_food_item(id, name, type, ingredients, price, image_url, quantity)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+updateCartFoodItemQuantity:
+UPDATE cart_food_item SET quantity = ? WHERE id = ?;
+
+deleteCartFoodItemById:
+DELETE FROM cart_food_item WHERE id = ?;
+
+insertCartTopping:
+INSERT OR REPLACE INTO cart_topping(id, name, price, image_url)
+VALUES (?, ?, ?, ?);
+
+updateCartToppingQuantity:
+UPDATE cart_food_item__topping SET topping_quantity = ? WHERE food_item_id = ? AND topping_id = ?;
+
+deleteCartToppingById:
+DELETE FROM cart_topping WHERE id = ?;
+
+insertCartFoodItemTopping:
+INSERT OR REPLACE INTO cart_food_item__topping(food_item_id, topping_id, topping_quantity)
+VALUES (?, ?, ?);
+
+deleteCartFoodItemToppingsByFoodItemId:
+DELETE FROM cart_food_item__topping WHERE food_item_id = ?;
+
+getAllCartFoodItemToppings:
+SELECT cfit.*
+FROM cart_food_item__topping AS cfit
+LEFT JOIN cart_food_item AS cfi ON 1=1 -- Dummy join to trigger re-emission
+LEFT JOIN cart_topping AS ct ON 1=1;  -- Dummy join to trigger re-emission
+
+getToppingsForFoodItemWithCount:
+SELECT t.*, cft.topping_quantity FROM cart_topping t
+JOIN cart_food_item__topping cft ON t.id = cft.topping_id
+WHERE cft.food_item_id = ?;
+
+removeCartFoodItemById:
+DELETE FROM cart_food_item WHERE id = ?;
+removeCartToppingsForFoodItem:
+DELETE FROM cart_food_item__topping WHERE food_item_id = ?;
+
+clearCartFoodItems:
+DELETE FROM cart_food_item;
+clearCartToppings:
+DELETE FROM cart_topping;
+clearCartFoodItemToppings:
+DELETE FROM cart_food_item__topping;
+
+getCartUniqueItemCount:
+SELECT COUNT(*) FROM cart_food_item;
+
+getFoodItemIdsInCart:
+SELECT id, quantity FROM cart_food_item;

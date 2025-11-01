@@ -2,27 +2,30 @@ package com.seenu.dev.android.lazypizza.presentation.pizza_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Logger.Companion.e
+import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaCartRepository
 import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaRepository
+import com.seenu.dev.android.lazypizza.domain.model.CartItem
+import com.seenu.dev.android.lazypizza.domain.model.FoodItemWithCount
 import com.seenu.dev.android.lazypizza.domain.model.FoodType
+import com.seenu.dev.android.lazypizza.presentation.mappers.toDomain
 import com.seenu.dev.android.lazypizza.presentation.mappers.toUiModel
+import com.seenu.dev.android.lazypizza.presentation.state.FoodItemUiModel
 import com.seenu.dev.android.lazypizza.presentation.state.FoodSection
 import com.seenu.dev.android.lazypizza.presentation.state.UiState
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.math.exp
 
 class PizzaListViewModel constructor(
-    private val repository: LazyPizzaRepository
+    private val repository: LazyPizzaRepository,
+    private val cartRepository: LazyPizzaCartRepository
 ) : ViewModel() {
 
-    private var items: List<FoodSection> = emptyList()
+    private var _items: List<FoodSection> = emptyList()
 
     private val _filteredItems: MutableStateFlow<UiState<FoodListUiState>> =
         MutableStateFlow(UiState.Empty())
@@ -53,28 +56,30 @@ class PizzaListViewModel constructor(
     private fun getFoodItems() {
         viewModelScope.launch {
             _filteredItems.value = UiState.Loading()
-            items = emptyList()
+            _items = emptyList()
             try {
-                delay((100..500L).random())
-                val sections = repository.getFoodItems()
-                    .groupBy { it.type }
-                    .map {
-                        FoodSection(
-                            type = it.key,
-                            items = it.value.map { item ->
-                                item.toUiModel()
-                            }
-                        )
-                    }.sortedBy { it.type.ordinal }
+                cartRepository.getCartItemsFlow().collect { cartItems ->
+                    val cartItemsMap = cartItems.associate { item -> item.foodItemWithCount.foodItem.id to item.foodItemWithCount.count }
+                    val sections = repository.getFoodItems()
+                        .groupBy { it.type }
+                        .map {
+                            FoodSection(
+                                type = it.key,
+                                items = it.value.map { item ->
+                                    item.toUiModel(cartItemsMap[item.id] ?: 0)
+                                }
+                            )
+                        }.sortedBy { it.type.ordinal }
 
-                items = sections
-                val filters = sections.map { it.type }
-                _filteredItems.value = UiState.Success(
-                    FoodListUiState(
-                        sections = sections,
-                        filters = filters
+                    _items = sections
+                    val filters = sections.map { it.type }
+                    _filteredItems.value = UiState.Success(
+                        FoodListUiState(
+                            sections = sections,
+                            filters = filters
+                        )
                     )
-                )
+                }
             } catch (exp: Exception) {
                 e(exp) { "Error fetching food items: ${exp.message}" }
                 _filteredItems.value =
@@ -83,7 +88,7 @@ class PizzaListViewModel constructor(
         }
     }
 
-    private fun updateCountInCard(itemId: Long, count: Int) {
+    private fun updateCountInCard(itemId: String, count: Int) {
         viewModelScope.launch {
             val newSections = mutableListOf<FoodSection>()
             val items = (filteredItems.value as? UiState.Success)?.data?.sections
@@ -98,6 +103,7 @@ class PizzaListViewModel constructor(
                     if (item != null) {
                         isItemFound = true
                         val newItem = item.copy(countInCart = count)
+                        updateCart(item, item.countInCart, count)
                         val newItems = section.items.map {
                             if (item.id == it.id) newItem else it
                         }
@@ -116,11 +122,30 @@ class PizzaListViewModel constructor(
         }
     }
 
+    private fun updateCart(item: FoodItemUiModel, oldCount: Int, newCount: Int) {
+        viewModelScope.launch {
+            val cartItem = CartItem(
+                foodItemWithCount = FoodItemWithCount(
+                    foodItem = item.toDomain(),
+                    count = newCount
+                )
+            )
+            if (newCount == 0) {
+                cartRepository.removeItemFromCart(item.id)
+            } else if (oldCount == 0 && newCount > 0) {
+                cartRepository.addItemToCart(cartItem)
+            } else {
+                cartRepository.updateItemInCart(cartItem)
+            }
+        }
+    }
+
+
     private fun updateSearchQuery(query: String) {
         val newSections = if (query.isBlank()) {
-            items
+            _items
         } else {
-            items.map { section ->
+            _items.map { section ->
                 val filteredItems =
                     section.items.filter { it.name.contains(query, ignoreCase = true) }
                 section.copy(items = filteredItems)
@@ -138,11 +163,11 @@ class PizzaListViewModel constructor(
 }
 
 sealed interface PizzaListEvent {
-    data class UpdateCountInCart(val itemId: Long, val count: Int) : PizzaListEvent
+    data class UpdateCountInCart(val itemId: String, val count: Int) : PizzaListEvent
     data class Search(val query: String) : PizzaListEvent
 }
 
-data class FoodListUiState(
+data class FoodListUiState constructor(
     val sections: List<FoodSection> = emptyList(),
     val filters: List<FoodType> = emptyList(),
     val search: String = ""

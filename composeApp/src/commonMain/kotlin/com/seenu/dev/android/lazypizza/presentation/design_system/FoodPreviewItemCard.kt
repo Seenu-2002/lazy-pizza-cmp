@@ -7,7 +7,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -21,7 +20,6 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,12 +29,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import coil3.compose.SubcomposeAsyncImage
 import com.seenu.dev.android.lazypizza.LocalCurrencyFormatter
 import com.seenu.dev.android.lazypizza.domain.model.FoodType
@@ -66,12 +62,13 @@ fun FoodPreviewItemCardWithCountPreview() {
         var data by remember {
             mutableStateOf(
                 FoodItemUiModel(
-                    id = 1L,
+                    id = "1",
                     name = "Veggie Delight",
                     type = FoodType.PIZZA,
-                    ingredients = "Tomato, Lettuce, Olives, Bell Peppers",
+                    ingredientsFormatted = "Tomato, Lettuce, Olives, Bell Peppers",
                     price = 9.99,
                     imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/Pepperoni_ety6cd.png",
+                    ingredients = emptyList(),
                     countInCart = 4
                 )
             )
@@ -98,10 +95,11 @@ fun FoodPreviewItemCardWithCountPreview() {
 fun FoodPreviewItemCardPreview() {
     LazyPizzaTheme {
         val data = FoodItemUiModel(
-            id = 1L,
+            id = "1",
             name = "Veggie Delight",
             type = FoodType.PIZZA,
-            ingredients = "Tomato, Lettuce, Olives, Bell Peppers",
+            ingredients = emptyList(),
+            ingredientsFormatted = "Tomato, Lettuce, Olives, Bell Peppers",
             imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/Pepperoni_ety6cd.png",
             price = 9.99,
         )
@@ -114,10 +112,11 @@ fun FoodPreviewItemCardPreview() {
 fun FoodPreviewItemCardWithCardPreview() {
     LazyPizzaTheme {
         val data = FoodItemUiModel(
-            id = 1L,
+            id = "1",
             name = "Mineral Water",
             type = FoodType.DRINK,
-            ingredients = null,
+            ingredients = emptyList(),
+            ingredientsFormatted = null,
             imageUrl = "https://res.cloudinary.com/dzfevhkfl/image/upload/v1759595128/Pepperoni_ety6cd.png",
             price = 9.99,
         )
@@ -198,7 +197,7 @@ fun FoodPreviewItemCard(
                     }
                 }
             }
-            data.ingredients?.let { ingredients ->
+            data.ingredientsFormatted?.let { ingredients ->
                 Spacer(modifier = Modifier.height(8.dp))
                 if (!isItemAddedToCard) {
                     Text(
