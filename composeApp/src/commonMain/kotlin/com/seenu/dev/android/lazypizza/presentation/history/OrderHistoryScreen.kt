@@ -2,38 +2,30 @@ package com.seenu.dev.android.lazypizza.presentation.history
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.seenu.dev.android.lazypizza.LocalDimensions
 import com.seenu.dev.android.lazypizza.presentation.design_system.LazyPizzaInfoCard
-import com.seenu.dev.android.lazypizza.presentation.design_system.LazyPizzaTextButton
 import com.seenu.dev.android.lazypizza.presentation.design_system.OrderHistoryCard
 import com.seenu.dev.android.lazypizza.presentation.theme.LazyPizzaTheme
 import com.seenu.dev.android.lazypizza.presentation.theme.body1Medium
-import com.seenu.dev.android.lazypizza.presentation.theme.body3Regular
-import com.seenu.dev.android.lazypizza.presentation.theme.textPrimary
-import com.seenu.dev.android.lazypizza.presentation.theme.textSecondary
-import com.seenu.dev.android.lazypizza.presentation.theme.title1Medium
-import com.seenu.dev.android.lazypizza.presentation.theme.title1SemiBold
-import com.seenu.dev.android.lazypizza.presentation.theme.title3
 import lazypizza.composeapp.generated.resources.Res
 import lazypizza.composeapp.generated.resources.go_to_menu
 import lazypizza.composeapp.generated.resources.no_orders
@@ -95,20 +87,38 @@ fun OrderHistoryScreen(openLoginScreen: () -> Unit, goToMenu: () -> Unit) {
                     modifier = Modifier.fillMaxWidth()
                 )
             } else {
-                LazyVerticalGrid(
+                LazyColumn(
                     modifier = Modifier.fillMaxSize()
                         .padding(horizontal = 16.dp),
-                    columns = GridCells.Fixed(dimensions.columnCount),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    items(orderHistoryUiState.orders.size) { index ->
-                        val order = orderHistoryUiState.orders[index]
-                        OrderHistoryCard(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            data = order
-                        )
+                    val itemPerRow = dimensions.columnCount
+                    val count = orderHistoryUiState.orders.size.let {
+                        if (it % itemPerRow == 0) it / itemPerRow else (it / itemPerRow) + 1
+                    }
+                    items(count) { count ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            for (i in 0 until itemPerRow) {
+                                val index = (count * 2) + i
+
+                                if (index < orderHistoryUiState.orders.size) {
+
+                                    val order = orderHistoryUiState.orders[index]
+                                    OrderHistoryCard(
+                                        modifier = Modifier
+                                            .weight(1F)
+                                            .fillMaxHeight(),
+                                        data = order
+                                    )
+
+                                } else {
+                                    Spacer(modifier = Modifier.weight(1F))
+                                }
+                            }
+                        }
                     }
                 }
             }
