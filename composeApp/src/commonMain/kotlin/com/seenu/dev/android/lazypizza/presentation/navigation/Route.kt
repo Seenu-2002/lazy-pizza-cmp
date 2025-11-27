@@ -16,4 +16,14 @@ sealed interface Route {
 
     @Serializable
     data object History : Route
+
+    @Serializable
+    data class Login constructor(val from: From) : Route {
+
+        @Serializable
+        enum class From  {
+            HISTORY,
+            LIST
+        }
+    }
 }

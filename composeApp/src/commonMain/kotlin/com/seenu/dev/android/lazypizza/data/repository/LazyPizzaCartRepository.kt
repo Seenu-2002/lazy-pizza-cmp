@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface LazyPizzaCartRepository {
     suspend fun getCartItems(): List<CartItem>
+    suspend fun syncCartItems()
     fun getCartItemsFlow(): Flow<List<CartItem>>
     fun getCartItemsCountFlow(): Flow<Int>
     fun getFoodItemIdsInCartFlow(): Flow<List<CartItemLite>>
@@ -13,5 +14,5 @@ interface LazyPizzaCartRepository {
     suspend fun addItemToCart(item: CartItem)
     suspend fun updateItemInCart(item: CartItem)
     suspend fun removeItemFromCart(itemId: String)
-    suspend fun clearCart()
+    suspend fun clearCart(syncWithRemote: Boolean = false)
 }

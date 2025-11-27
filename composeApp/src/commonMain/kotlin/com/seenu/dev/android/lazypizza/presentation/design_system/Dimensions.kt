@@ -5,7 +5,8 @@ import androidx.compose.ui.unit.dp
 
 data class Dimensions constructor(
     val listScreen: PizzaListScreenDimensions,
-    val navBar: NavBarDimensions
+    val navBar: NavBarDimensions,
+    val historyScreen: HistoryScreenDimensions
 )
 
 data class PizzaListScreenDimensions constructor(
@@ -17,12 +18,17 @@ data class NavBarDimensions constructor(
     val iconLabelSpacing: Dp
 )
 
+data class HistoryScreenDimensions constructor(
+    val columnCount: Int
+)
+
 val mobileDimensions = Dimensions(
     listScreen = PizzaListScreenDimensions(
         gridCount = 1,
-        bannerHeight = 150.dp
+        bannerHeight = 140.dp
     ),
-    navBar = NavBarDimensions(iconLabelSpacing = 2.dp)
+    navBar = NavBarDimensions(iconLabelSpacing = 2.dp),
+    historyScreen = HistoryScreenDimensions(columnCount = 1)
 )
 
 val tabletDimensions = Dimensions(
@@ -30,5 +36,6 @@ val tabletDimensions = Dimensions(
         gridCount = 2,
         bannerHeight = 160.dp
     ),
-    navBar = NavBarDimensions(iconLabelSpacing = 0.dp)
+    navBar = NavBarDimensions(iconLabelSpacing = 0.dp),
+    historyScreen = HistoryScreenDimensions(columnCount = 2)
 )

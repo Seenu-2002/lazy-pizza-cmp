@@ -37,10 +37,14 @@ import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,13 +63,16 @@ import coil3.memory.MemoryCache
 import coil3.request.CachePolicy
 import coil3.request.crossfade
 import coil3.util.DebugLogger
+import com.seenu.dev.android.lazypizza.firebase.LazyPizzaAuth
 import com.seenu.dev.android.lazypizza.presentation.cart.PizzaCartScreen
 import com.seenu.dev.android.lazypizza.presentation.design_system.LazyPizzaNavBarItem
 import com.seenu.dev.android.lazypizza.presentation.history.OrderHistoryScreen
+import com.seenu.dev.android.lazypizza.presentation.login.LoginScreen
 import com.seenu.dev.android.lazypizza.presentation.pizza_detail.PizzaDetailScreen
 import com.seenu.dev.android.lazypizza.presentation.pizza_list.PizzaListScreen
 import com.seenu.dev.android.lazypizza.presentation.theme.LazyPizzaTheme
 import com.seenu.dev.android.lazypizza.presentation.theme.surfaceHigher
+import kotlinx.coroutines.launch
 import lazypizza.composeapp.generated.resources.Res
 import lazypizza.composeapp.generated.resources.ic_cart
 import lazypizza.composeapp.generated.resources.ic_history
@@ -81,16 +88,22 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun LazyPizzaNavigationMobile(
+    auth: LazyPizzaAuth,
     showBottomBar: Boolean,
     navController: NavHostController,
     navItems: List<NavItem>,
     selectedNavItem: NavItem,
     onItemSelected: (NavItem) -> Unit = {}
 ) {
+    val snackBarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets.systemBars.only(WindowInsetsSides.Bottom),
+        snackbarHost = {
+            SnackbarHost(hostState = snackBarHostState)
+        },
         bottomBar = {
             AnimatedVisibility(
                 visible = showBottomBar, enter = slideInVertically(
@@ -113,7 +126,15 @@ fun LazyPizzaNavigationMobile(
         }) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             LazyPizzaNavHost(
+                auth = auth,
                 navController = navController,
+                onShowSnackBar = {
+                    scope.launch {
+                        snackBarHostState.showSnackbar(
+                            message = it
+                        )
+                    }
+                },
                 modifier = Modifier.matchParentSize(),
             )
         }
@@ -122,23 +143,40 @@ fun LazyPizzaNavigationMobile(
 
 @Composable
 fun LazyPizzaNavigationTablet(
+    auth: LazyPizzaAuth,
     navController: NavHostController,
     navItems: List<NavItem>,
     selectedNavItem: NavItem,
     onItemSelected: (NavItem) -> Unit = {}
 ) {
+    val snackBarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets.systemBars.only(WindowInsetsSides.Bottom),
+        snackbarHost = {
+            SnackbarHost(hostState = snackBarHostState, snackbar = {
+                Snackbar(
+                    snackbarData = it,
+                    containerColor = MaterialTheme.colorScheme.surfaceHigher,
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
+            })
+        }
     ) { innerPadding ->
         Row(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            Column(modifier = Modifier
-                .width(78.dp)
-                .fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+            Column(
+                modifier = Modifier
+                    .width(78.dp)
+                    .fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
                 for (item in navItems) {
                     LazyPizzaNavBarItem(
                         selectedNavItem == item,
@@ -160,7 +198,15 @@ fun LazyPizzaNavigationTablet(
                 modifier = Modifier.padding(top = insets.calculateTopPadding())
             )
             LazyPizzaNavHost(
+                auth = auth,
                 navController = navController,
+                onShowSnackBar = {
+                    scope.launch {
+                        snackBarHostState.showSnackbar(
+                            message = it
+                        )
+                    }
+                },
                 modifier = Modifier.fillMaxHeight().weight(1F),
             )
         }
@@ -168,17 +214,45 @@ fun LazyPizzaNavigationTablet(
 }
 
 @Composable
-private fun LazyPizzaNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
+private fun LazyPizzaNavHost(
+    auth: LazyPizzaAuth,
+    navController: NavHostController,
+    onShowSnackBar: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     NavHost(
         modifier = modifier,
         navController = navController,
         startDestination = Route.PizzaList,
     ) {
 
-        composable<Route.PizzaList> {
-            PizzaListScreen(openDialer = {}, openDetailScreen = { id ->
-                navController.navigate(Route.PizzaDetail(id))
+        composable<Route.Login> { backStackEntry ->
+            val route = backStackEntry.toRoute<Route.Login>()
+            LoginScreen(auth = auth, onLoginSuccess = {
+                val route = when (route.from) {
+                    Route.Login.From.HISTORY -> Route.History
+                    Route.Login.From.LIST -> Route.PizzaList
+                }
+                navController.navigate(route) {
+                    popUpTo(Route.PizzaList) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
             })
+        }
+
+        composable<Route.PizzaList> {
+            PizzaListScreen(
+                openDialer = {},
+                openLoginScreen = {
+                    navController.navigate(Route.Login(from = Route.Login.From.LIST))
+                },
+                openDetailScreen = { id ->
+                    navController.navigate(Route.PizzaDetail(id))
+                },
+                showSnackBar = onShowSnackBar
+            )
         }
 
         composable<Route.PizzaDetail> { backStackEntry ->
@@ -203,7 +277,16 @@ private fun LazyPizzaNavHost(navController: NavHostController, modifier: Modifie
         }
 
         composable<Route.History> {
-            OrderHistoryScreen()
+            OrderHistoryScreen(
+                openLoginScreen = {
+                    navController.navigate(Route.Login(from = Route.Login.From.HISTORY))
+                },
+                goToMenu = {
+                    navController.navigate(Route.PizzaList) {
+                        popUpTo(0)
+                    }
+                }
+            )
         }
     }
 }

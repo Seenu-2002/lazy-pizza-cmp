@@ -100,6 +100,14 @@ val Typography.body1Medium
         lineHeight = 22.sp
     )
 
+val Typography.body2Regular
+    @Composable get() = TextStyle(
+        fontFamily = InstrumentSans,
+        fontWeight = FontWeight.Normal,
+        fontSize = 15.sp,
+        lineHeight = 22.sp
+    )
+
 val Typography.body3Regular
     @Composable get() = TextStyle(
         fontFamily = InstrumentSans,

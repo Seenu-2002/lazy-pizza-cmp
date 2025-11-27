@@ -2,12 +2,13 @@ package com.seenu.dev.android.lazypizza.presentation.pizza_list
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,15 +20,17 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -35,7 +38,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.seenu.dev.android.lazypizza.LocalDimensions
@@ -51,14 +56,21 @@ import com.seenu.dev.android.lazypizza.presentation.theme.LazyPizzaTheme
 import com.seenu.dev.android.lazypizza.presentation.theme.body1Regular
 import com.seenu.dev.android.lazypizza.presentation.theme.body3Bold
 import com.seenu.dev.android.lazypizza.presentation.theme.label2Semibold
+import com.seenu.dev.android.lazypizza.presentation.theme.primary8
 import com.seenu.dev.android.lazypizza.presentation.theme.textSecondary
+import com.seenu.dev.android.lazypizza.presentation.theme.textSecondary8
 import com.seenu.dev.android.lazypizza.presentation.utils.getStringRes
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import lazypizza.composeapp.generated.resources.Res
 import lazypizza.composeapp.generated.resources.app_name
 import lazypizza.composeapp.generated.resources.ic_phone
 import lazypizza.composeapp.generated.resources.ic_pizza
 import lazypizza.composeapp.generated.resources.img_banner
+import lazypizza.composeapp.generated.resources.ic_logout
+import lazypizza.composeapp.generated.resources.ic_user
+import lazypizza.composeapp.generated.resources.logout_success
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -81,12 +93,33 @@ private fun PizzaListScreenPreview() {
 @Composable
 fun PizzaListScreen(
     openDetailScreen: (String) -> Unit = {},
+    openLoginScreen: () -> Unit = {},
     openDialer: () -> Unit = {},
+    showSnackBar: (String) -> Unit = {}
 ) {
     val viewModel: PizzaListViewModel = koinViewModel()
     val itemsState by viewModel.filteredItems.collectAsStateWithLifecycle()
 
     val dimensions = LocalDimensions.current.listScreen
+
+
+    val logoutMessage = stringResource(Res.string.logout_success)
+    LaunchedEffect(Unit) {
+        viewModel.oneOfEvents.collectLatest {
+            when (it) {
+                is PizzaListOneOfEvent.OpenLoginScreen -> {
+                    openLoginScreen()
+                }
+
+                is PizzaListOneOfEvent.LogoutSuccess -> {
+                    showSnackBar.invoke(
+                        logoutMessage
+                    )
+                }
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -108,7 +141,11 @@ fun PizzaListScreen(
                 }
             },
             actions = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable(
+                        onClick = openDialer
+                    )
+                ) {
                     Icon(
                         painter = painterResource(Res.drawable.ic_phone),
                         contentDescription = null,
@@ -116,6 +153,47 @@ fun PizzaListScreen(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("+1 (555) 321-7890", style = MaterialTheme.typography.body1Regular)
+                }
+
+                if (itemsState is UiState.Success) {
+                    val isUserLoggedIn = (itemsState as UiState.Success).data.user != null
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    val iconRes: DrawableResource
+                    val background: Color
+                    if (isUserLoggedIn) {
+                        iconRes = Res.drawable.ic_logout
+                        background = MaterialTheme.colorScheme.primary8
+                    } else {
+                        iconRes = Res.drawable.ic_user
+                        background = MaterialTheme.colorScheme.textSecondary8
+                    }
+                    Box(
+                        modifier = Modifier
+                            .background(color = background, shape = CircleShape)
+                            .clickable(
+                                onClick = {
+                                    val intent = if (isUserLoggedIn) {
+                                        PizzaListIntent.Logout
+                                    } else {
+                                        PizzaListIntent.Login
+                                    }
+                                    viewModel.handleEvent(intent)
+                                },
+                                role = Role.Button,
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = ripple(
+                                    bounded = false,
+                                )
+                            )
+                            .padding(8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(iconRes),
+                            contentDescription = null,
+                            tint = Color.Unspecified
+                        )
+                    }
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
@@ -138,7 +216,7 @@ fun PizzaListScreen(
                     modifier = Modifier.fillMaxWidth()
                         .height(dimensions.bannerHeight)
                         .clip(MaterialTheme.shapes.small),
-                    contentScale = ContentScale.FillWidth
+                    contentScale = ContentScale.FillBounds,
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -165,7 +243,7 @@ fun PizzaListScreen(
                                 },
                                 onAdd = { item ->
                                     viewModel.handleEvent(
-                                        PizzaListEvent.UpdateCountInCart(
+                                        PizzaListIntent.UpdateCountInCart(
                                             item.id,
                                             item.countInCart + 1
                                         )
@@ -173,18 +251,18 @@ fun PizzaListScreen(
                                 },
                                 onReduce = { item ->
                                     viewModel.handleEvent(
-                                        PizzaListEvent.UpdateCountInCart(
+                                        PizzaListIntent.UpdateCountInCart(
                                             item.id,
                                             (item.countInCart - 1).coerceAtLeast(0)
                                         )
                                     )
                                 },
                                 onSearchChange = { query ->
-                                    viewModel.handleEvent(PizzaListEvent.Search(query))
+                                    viewModel.handleEvent(PizzaListIntent.Search(query))
                                 },
                                 onRemove = { item ->
                                     viewModel.handleEvent(
-                                        PizzaListEvent.UpdateCountInCart(
+                                        PizzaListIntent.UpdateCountInCart(
                                             item.id,
                                             0
                                         )

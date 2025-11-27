@@ -1,6 +1,9 @@
 package com.seenu.dev.android.lazypizza
 
 import android.app.Application
+import com.google.firebase.FirebaseApp
+import com.google.firebase.appcheck.FirebaseAppCheck
+import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.seenu.dev.android.lazypizza.di.initKoin
 import com.seenu.dev.android.lazypizza.di.lazyPizzaModule
 import com.seenu.dev.android.lazypizza.di.platformModule
@@ -20,6 +23,7 @@ class LazyPizzaApplication : Application() {
                 platformModule
             )
         }
+
     }
 
 }

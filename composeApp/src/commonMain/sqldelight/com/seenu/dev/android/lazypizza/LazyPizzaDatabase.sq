@@ -80,5 +80,8 @@ DELETE FROM cart_food_item__topping;
 getCartUniqueItemCount:
 SELECT COUNT(*) FROM cart_food_item;
 
+getCartItemsCount:
+SELECT SUM(quantity) AS count FROM cart_food_item;
+
 getFoodItemIdsInCart:
 SELECT id, quantity FROM cart_food_item;

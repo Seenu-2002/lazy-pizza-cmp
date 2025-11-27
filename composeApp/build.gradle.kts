@@ -41,9 +41,16 @@ kotlin {
 
             // Firebase
             implementation(project.dependencies.platform(libs.android.firebase.bom))
+            implementation(libs.firebase.auth)
 
             // SQLDelight
             implementation(libs.sqldelight.android)
+
+            // play-integrity
+            implementation(libs.play.integrity)
+
+            // Lib-phone number
+            implementation(libs.lib.phone.number.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -86,6 +93,8 @@ kotlin {
 
             // Firestore
             implementation(libs.gitlive.firebase.firestore)
+            // Auth
+            implementation(libs.gitlive.firebase.auth)
 
             // SQLDelight
             implementation(libs.sqldelight.coroutines)

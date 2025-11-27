@@ -25,7 +25,27 @@
     <string name="back_to_menu">Back to Menu</string>
     <string name="topping_cart_format">%1$s x %2$s</string>
     <string name="proceed_to_checkout">Proceed to Checkout (%1$s)</string>
+    <string name="no_orders">No Orders Yet</string>
+    <string name="no_orders_msg">Your orders will appear here after your first purchase.</string>
+    <string name="go_to_menu">Go to Menu</string>
 
     <string name="recommended_items">Recommended to add to your order</string>
+    <string name="status_pending">Pending</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_in_progress">In Progress</string>
+    <string name="status_cancelled">In Progress</string>
+    <string name="total_amount">Total Amount:</string>
+
+    <!--  Login Screen  -->
+    <string name="welcome_msg">Welcome to LazyPizza</string>
+    <string name="enter_phone">Enter your phone number</string>
+    <string name="btn_continue">Continue</string>
+    <string name="btn_confirm">Confirm</string>
+    <string name="continue_as_guest">Continue without signing in</string>
+    <string name="enter_code">Enter code</string>
+    <string name="resend_code">Resend code</string>
+    <string name="request_new_code">You can request a new code in %1$s</string>
+    <string name="error_otp">Incorrect code. Please try again</string>
+    <string name="logout_success">User logged out successfully!</string>
 
 </resources>
