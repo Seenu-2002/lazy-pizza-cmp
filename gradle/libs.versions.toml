@@ -24,9 +24,11 @@ ktor = "3.3.1"
 adaptive3 = "1.3.0-alpha01"
 window-size = "1.4.0"
 adaptive = "1.2.0-alpha07"
-firebase-bom = "34.4.0"
+firebase-bom = "34.5.0"
 gitlive = "2.3.0"
 sqldelight = "2.1.0"
+lib-phone-number = "8.2.0"
+play-integrity = "19.0.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -65,10 +67,14 @@ window-size = { group = "androidx.compose.material3", name = "material3-window-s
 adaptive = { module = "org.jetbrains.compose.material3.adaptive:adaptive", version.ref = "adaptive" }
 android-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
 gitlive-firebase-firestore = { group = "dev.gitlive", name = "firebase-firestore", version.ref = "gitlive" }
+gitlive-firebase-auth = { group = "dev.gitlive", name = "firebase-auth", version.ref = "gitlive" }
+firebase-auth = { module = "com.google.firebase:firebase-auth" }
 sqldelight-android = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
 sqldelight-native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
 sqldelight-jvm = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqldelight" }
 sqldelight-coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
+lib-phone-number-android = { module = "com.googlecode.libphonenumber:libphonenumber", version.ref = "lib-phone-number" }
+play-integrity = { module = "com.google.firebase:firebase-appcheck-playintegrity", version.ref = "play-integrity" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

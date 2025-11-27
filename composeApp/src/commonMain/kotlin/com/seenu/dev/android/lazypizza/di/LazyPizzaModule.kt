@@ -7,6 +7,11 @@ import com.seenu.dev.android.lazypizza.domain.repository.FirebaseLazyPizzaReposi
 import com.seenu.dev.android.lazypizza.domain.repository.LocalCartRepository
 import com.seenu.dev.android.lazypizza.presentation.cart.PizzaCartViewModel
 import com.seenu.dev.android.lazypizza.LazyPizzaAppViewModel
+import com.seenu.dev.android.lazypizza.data.remote.RemoteCartDataSource
+import com.seenu.dev.android.lazypizza.data.repository.UserRepository
+import com.seenu.dev.android.lazypizza.domain.repository.UserRepositoryImpl
+import com.seenu.dev.android.lazypizza.presentation.history.OrderHistoryViewModel
+import com.seenu.dev.android.lazypizza.presentation.login.LoginViewModel
 import com.seenu.dev.android.lazypizza.presentation.pizza_detail.PizzaDetailViewModel
 import com.seenu.dev.android.lazypizza.presentation.pizza_list.PizzaListViewModel
 import org.koin.core.module.dsl.viewModel
@@ -49,11 +54,15 @@ import org.koin.dsl.module
 
 // Create a Koin module using the DSL style
 val lazyPizzaModule = module {
-    viewModel { PizzaListViewModel(get(), get()) }
+    viewModel { PizzaListViewModel(get(), get(), get()) }
     viewModel { PizzaDetailViewModel(get(), get()) }
     viewModel { PizzaCartViewModel(get(), get()) }
     viewModel { LazyPizzaAppViewModel(get()) }
+    viewModel { LoginViewModel(get(), get(), get()) }
+    viewModel { OrderHistoryViewModel() }
     single<LazyPizzaDatabase> { LazyPizzaDatabase(get()) }
     single<LazyPizzaRepository> { FirebaseLazyPizzaRepository() }
-    single<LazyPizzaCartRepository> { LocalCartRepository(get()) }
+    single<LazyPizzaCartRepository> { LocalCartRepository(get(), get()) }
+    single<RemoteCartDataSource> { RemoteCartDataSource(get()) }
+    single<UserRepository> { UserRepositoryImpl() }
 }

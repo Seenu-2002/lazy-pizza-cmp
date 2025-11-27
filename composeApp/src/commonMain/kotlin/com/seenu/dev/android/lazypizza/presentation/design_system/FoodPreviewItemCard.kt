@@ -184,7 +184,7 @@ fun FoodPreviewItemCard(
                 )
                 if (data.countInCart > 0) {
                     Spacer(modifier = Modifier.width(8.dp))
-                    LazyPizzaIconButton(
+                    LazyPizzaCounterIconButton(
                         onClick = onDelete,
                         modifier = Modifier.size(22.dp)
                     ) {

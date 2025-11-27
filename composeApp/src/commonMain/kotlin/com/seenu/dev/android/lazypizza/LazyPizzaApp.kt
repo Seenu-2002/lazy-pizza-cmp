@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import co.touchlab.kermit.Logger
 import coil3.compose.setSingletonImageLoaderFactory
+import com.seenu.dev.android.lazypizza.firebase.LazyPizzaAuth
 import com.seenu.dev.android.lazypizza.presentation.navigation.LazyPizzaNavigationMobile
 import com.seenu.dev.android.lazypizza.presentation.navigation.LazyPizzaNavigationTablet
 import com.seenu.dev.android.lazypizza.presentation.navigation.NavItem
@@ -23,7 +24,9 @@ import kotlinx.serialization.json.Json
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun LazyPizzaApp() {
+fun LazyPizzaApp(
+    auth: LazyPizzaAuth
+) {
     LazyPizzaTheme {
         setSingletonImageLoaderFactory { context ->
             getAsyncImageLoader(context)
@@ -47,7 +50,11 @@ fun LazyPizzaApp() {
             }
         }
         val showNavBar by derivedStateOf {
-            currentRoute !is Route.PizzaDetail
+            currentRoute in listOf(
+                Route.PizzaList,
+                Route.Cart,
+                Route.History
+            )
         }
         val items by derivedStateOf {
             listOf(
@@ -59,6 +66,7 @@ fun LazyPizzaApp() {
 
         if (isTablet) {
             LazyPizzaNavigationTablet(
+                auth = auth,
                 navController = navController,
                 navItems = items,
                 selectedNavItem = selected,
@@ -70,6 +78,7 @@ fun LazyPizzaApp() {
             )
         } else {
             LazyPizzaNavigationMobile(
+                auth = auth,
                 showBottomBar = showNavBar,
                 navController = navController,
                 navItems = items,
@@ -85,8 +94,7 @@ fun LazyPizzaApp() {
 }
 
 fun NavBackStackEntry.toRouteOrNull(): Route? {
-    val route = destination.route
-    return when (route) {
+    return when (val route = destination.route) {
         Route.PizzaList::class.qualifiedName -> Route.PizzaList
         Route.Cart::class.qualifiedName -> Route.Cart
         Route.History::class.qualifiedName -> Route.History

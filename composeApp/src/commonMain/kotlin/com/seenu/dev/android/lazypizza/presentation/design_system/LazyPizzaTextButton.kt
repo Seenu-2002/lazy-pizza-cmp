@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.LinearGradient
+import androidx.compose.ui.input.key.Key.Companion.P
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -31,6 +32,8 @@ import com.seenu.dev.android.lazypizza.presentation.theme.primaryGradientStart
 @Composable
 fun LazyPizzaTextButton(
     onClick: () -> Unit,
+    isLoading: Boolean = false,
+    enabled: Boolean = true,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     content: @Composable BoxScope.() -> Unit
@@ -44,26 +47,35 @@ fun LazyPizzaTextButton(
                 minWidth = ButtonDefaults.MinWidth,
                 minHeight = ButtonDefaults.MinHeight,
             )
-            .dropShadow(
-                shape = CircleShape,
-                shadow = androidx.compose.ui.graphics.shadow.Shadow(
-                    radius = 6.dp,
-                    spread = 0.dp,
-                    color = Color(0x40F36B50),
-                    offset = DpOffset(x = 0.dp, 4.dp)
-                )
-            )
-            .background(
-                shape = CircleShape,
-                brush = Brush.horizontalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.primaryGradientEnd,
-                        MaterialTheme.colorScheme.primaryGradientStart,
-                    ),
-                )
-            )
+            .let {
+                if (enabled) {
+                    it.dropShadow(
+                            shape = CircleShape,
+                            shadow = androidx.compose.ui.graphics.shadow.Shadow(
+                                radius = 6.dp,
+                                spread = 0.dp,
+                                color = Color(0x40F36B50),
+                                offset = DpOffset(x = 0.dp, 4.dp)
+                            )
+                        )
+                        .background(
+                            shape = CircleShape,
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primaryGradientEnd,
+                                    MaterialTheme.colorScheme.primaryGradientStart,
+                                ),
+                            )
+                        )
+                } else {
+                    it.background(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                    )
+                }
+            }
             .clip(CircleShape)
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled && !isLoading, onClick = onClick)
             .padding(contentPadding),
         contentAlignment = Alignment.Center,
         content = content

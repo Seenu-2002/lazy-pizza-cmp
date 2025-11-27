@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,9 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpOffset
@@ -36,7 +33,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.SubcomposeAsyncImage
-import coil3.size.Size
 import com.seenu.dev.android.lazypizza.LocalCurrencyFormatter
 import com.seenu.dev.android.lazypizza.domain.model.FoodType
 import com.seenu.dev.android.lazypizza.presentation.state.CartItemUiModel
@@ -195,7 +191,7 @@ fun CartItemCard(
                     style = MaterialTheme.typography.body1Medium
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                LazyPizzaIconButton(
+                LazyPizzaCounterIconButton(
                     onClick = onRemove,
                     modifier = Modifier.size(22.dp)
                 ) {

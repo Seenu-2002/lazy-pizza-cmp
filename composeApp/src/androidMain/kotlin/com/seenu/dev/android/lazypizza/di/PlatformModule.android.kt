@@ -3,6 +3,7 @@ package com.seenu.dev.android.lazypizza.di
 import android.content.Context
 import app.cash.sqldelight.db.SqlDriver
 import com.seenu.dev.android.lazypizza.database.DatabaseDriverFactory
+import com.seenu.dev.android.lazypizza.domain.util.PhoneNumberValidator
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
@@ -22,4 +23,5 @@ import org.koin.core.annotation.Single
 
 val platformModule = org.koin.dsl.module {
     single<SqlDriver> { DatabaseDriverFactory(get()).create() }
+    single<PhoneNumberValidator> { PhoneNumberValidator() }
 }

@@ -175,7 +175,7 @@ fun AddOnCard(
                         style = MaterialTheme.typography.title1SemiBold,
                         modifier = Modifier.weight(1f)
                     )
-                    LazyPizzaIconButton(
+                    LazyPizzaCounterIconButton(
                         onClick = onClick,
                         modifier = Modifier.size(22.dp)
                     ) {
