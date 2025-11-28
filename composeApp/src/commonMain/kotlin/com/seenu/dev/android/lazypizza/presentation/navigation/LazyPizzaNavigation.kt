@@ -65,6 +65,7 @@ import coil3.request.crossfade
 import coil3.util.DebugLogger
 import com.seenu.dev.android.lazypizza.firebase.LazyPizzaAuth
 import com.seenu.dev.android.lazypizza.presentation.cart.PizzaCartScreen
+import com.seenu.dev.android.lazypizza.presentation.checkout.OrderCheckoutScreen
 import com.seenu.dev.android.lazypizza.presentation.design_system.LazyPizzaNavBarItem
 import com.seenu.dev.android.lazypizza.presentation.history.OrderHistoryScreen
 import com.seenu.dev.android.lazypizza.presentation.login.LoginScreen
@@ -273,6 +274,8 @@ private fun LazyPizzaNavHost(
                 navController.navigate(Route.PizzaList) {
                     popUpTo(0)
                 }
+            }, placeOrder = {
+                navController.navigate(Route.Checkout)
             })
         }
 
@@ -284,6 +287,22 @@ private fun LazyPizzaNavHost(
                 goToMenu = {
                     navController.navigate(Route.PizzaList) {
                         popUpTo(0)
+                    }
+                }
+            )
+        }
+
+        composable<Route.Checkout> {
+            OrderCheckoutScreen(
+                onNavigateBack = {
+                    navController.navigateUp()
+                },
+                goToMenu = {
+                    navController.navigate(Route.PizzaList) {
+                        popUpTo(Route.PizzaList) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
                     }
                 }
             )

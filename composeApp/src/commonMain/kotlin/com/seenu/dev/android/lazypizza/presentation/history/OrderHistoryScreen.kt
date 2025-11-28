@@ -1,6 +1,7 @@
 package com.seenu.dev.android.lazypizza.presentation.history
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -12,12 +13,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -66,6 +69,18 @@ fun OrderHistoryScreen(openLoginScreen: () -> Unit, goToMenu: () -> Unit) {
                 containerColor = MaterialTheme.colorScheme.background
             )
         )
+
+        if (orderHistoryUiState.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxWidth()
+                    .weight(1F),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+
+            return
+        }
 
         if (!orderHistoryUiState.isUserLoggedIn) {
             Spacer(modifier = Modifier.height(120.dp))
@@ -123,7 +138,5 @@ fun OrderHistoryScreen(openLoginScreen: () -> Unit, goToMenu: () -> Unit) {
                 }
             }
         }
-
-
     }
 }

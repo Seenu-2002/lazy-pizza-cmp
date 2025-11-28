@@ -1,17 +1,15 @@
 package com.seenu.dev.android.lazypizza.data.remote
 
-import co.touchlab.kermit.Logger
-import co.touchlab.kermit.Logger.Companion.d
-import co.touchlab.kermit.Logger.Companion.e
-import com.seenu.dev.android.lazypizza.data.dto.FoodItemDto
-import com.seenu.dev.android.lazypizza.data.dto.ToppingDto
-import com.seenu.dev.android.lazypizza.data.mappers.toDomain
+import com.seenu.dev.android.lazypizza.data.dto.OrderDataDto
+import com.seenu.dev.android.lazypizza.data.dto.OrderHistoryDto
+import com.seenu.dev.android.lazypizza.data.dto.OrderInfoDto
 import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaRepository
 import com.seenu.dev.android.lazypizza.domain.model.CartItem
 import com.seenu.dev.android.lazypizza.domain.model.FoodItemWithCount
 import com.seenu.dev.android.lazypizza.domain.model.ToppingWithCount
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.auth
+import dev.gitlive.firebase.firestore.Timestamp
 import dev.gitlive.firebase.firestore.WriteBatch
 import dev.gitlive.firebase.firestore.firestore
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +18,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.time.ExperimentalTime
 
 class RemoteCartDataSource constructor(
     private val repository: LazyPizzaRepository
@@ -157,6 +156,45 @@ class RemoteCartDataSource constructor(
         return clearCartInternal()
     }
 
+    @OptIn(ExperimentalTime::class)
+    suspend fun checkout(data: OrderDataDto, items: List<CartItem>): OrderInfoDto {
+        return withContext(Dispatchers.IO) {
+            val user = auth.currentUser ?: throw IllegalStateException("User not logged in")
+            val batch = firestore.batch()
+
+            // Create order document
+            val orderDocRef = firestore.collection("orders")
+                .document
+            val orderData = mapOf(
+                "order_id" to data.id,
+                "user_id" to user.uid,
+                "order_time" to data.time,
+                "comments" to data.comments,
+                "items" to items.map { item ->
+                    mapOf(
+                        "food_item_id" to item.foodItemWithCount.foodItem.id,
+                        "quantity" to item.foodItemWithCount.count,
+                        "toppings" to item.toppingsWithCount.map {
+                            mapOf(
+                                "topping_id" to it.topping.id,
+                                "quantity" to it.count
+                            )
+                        }
+                    )
+                },
+                "timestamp" to Timestamp.now()
+            )
+            batch.set(orderDocRef, orderData)
+
+            // Clear cart
+            clearCartInternal(batch)
+            OrderInfoDto(
+                id = data.id,
+                time = data.time
+            )
+        }
+    }
+
     private suspend fun clearCartInternal(batch: WriteBatch = firestore.batch()) {
         return withContext(Dispatchers.IO) {
             val user = auth.currentUser ?: return@withContext
@@ -171,6 +209,23 @@ class RemoteCartDataSource constructor(
                 batch.delete(item.reference)
             }
             batch.commit()
+        }
+    }
+
+    suspend fun getOrders(): List<OrderHistoryDto> {
+        return withContext(Dispatchers.IO) {
+            val user = auth.currentUser ?: return@withContext emptyList()
+            val documents = firestore.collection("orders")
+                .where {
+                    "user_id" equalTo user.uid
+                }
+                .get()
+                .documents
+
+            val orders = documents.map { doc ->
+                doc.data<OrderHistoryDto>()
+            }
+            orders
         }
     }
 

@@ -29,6 +29,7 @@ gitlive = "2.3.0"
 sqldelight = "2.1.0"
 lib-phone-number = "8.2.0"
 play-integrity = "19.0.1"
+date-time = "0.7.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -75,6 +76,7 @@ sqldelight-jvm = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "
 sqldelight-coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
 lib-phone-number-android = { module = "com.googlecode.libphonenumber:libphonenumber", version.ref = "lib-phone-number" }
 play-integrity = { module = "com.google.firebase:firebase-appcheck-playintegrity", version.ref = "play-integrity" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "date-time" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

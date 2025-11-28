@@ -98,6 +98,9 @@ kotlin {
 
             // SQLDelight
             implementation(libs.sqldelight.coroutines)
+
+            // Date time
+            implementation(libs.kotlinx.datetime)
         }
         iosMain.dependencies {
             // Ktor

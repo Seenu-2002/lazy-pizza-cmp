@@ -66,12 +66,12 @@ import org.koin.compose.viewmodel.koinViewModel
 @Preview
 @Composable
 private fun PizzaCartScreenPreview() {
-    LazyPizzaTheme { PizzaCartScreen({}) }
+    LazyPizzaTheme { PizzaCartScreen({}, {}) }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PizzaCartScreen(onBackToMenu: () -> Unit) {
+fun PizzaCartScreen(onBackToMenu: () -> Unit, placeOrder: () -> Unit) {
 
     val viewModel: PizzaCartViewModel = koinViewModel()
     val cartState by viewModel.cart.collectAsStateWithLifecycle()
@@ -84,7 +84,7 @@ fun PizzaCartScreen(onBackToMenu: () -> Unit) {
         viewModel.events.collect {
             when (it) {
                 CartSideEffect.Checkout -> {
-                    // TODO: Checkout logic
+                    placeOrder()
                 }
             }
         }
@@ -137,7 +137,7 @@ fun PizzaCartScreen(onBackToMenu: () -> Unit) {
                                 )
                                 LazyPizzaTextButton(
                                     onClick = {
-                                        // TODO: Checkout action
+                                        viewModel.onIntent(CartIntent.Checkout)
                                     },
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
