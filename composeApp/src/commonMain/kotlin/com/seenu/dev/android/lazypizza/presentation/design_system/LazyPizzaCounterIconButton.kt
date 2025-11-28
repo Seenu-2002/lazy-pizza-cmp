@@ -32,7 +32,7 @@ fun LazyPizzaCounterIconButton(
         disabledContentColor = MaterialTheme.colorScheme.textPrimary.copy(0.38F)
     )
     Box(
-        modifier = modifier
+        modifier = Modifier
             .clip(shape)
             .border(
                 1.dp,
@@ -47,7 +47,7 @@ fun LazyPizzaCounterIconButton(
                 indication = ripple(
                     bounded = false,
                 )
-            ),
+            ).then(modifier),
         contentAlignment = Alignment.Center
     ) {
         val contentColor = if (enabled) {

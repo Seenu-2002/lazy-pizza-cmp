@@ -6,10 +6,16 @@ import app.cash.sqldelight.coroutines.mapToOne
 import co.touchlab.kermit.Logger.Companion.d
 import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaCartRepository
 import com.seenu.dev.android.lazypizza.LazyPizzaDatabase
+import com.seenu.dev.android.lazypizza.data.dto.OrderInfoDto
+import com.seenu.dev.android.lazypizza.data.mappers.toDomain
+import com.seenu.dev.android.lazypizza.data.mappers.toDto
 import com.seenu.dev.android.lazypizza.data.mappers.toFoodItemWithCount
 import com.seenu.dev.android.lazypizza.data.remote.RemoteCartDataSource
+import com.seenu.dev.android.lazypizza.domain.OrderHistoryItem
 import com.seenu.dev.android.lazypizza.domain.model.CartItem
 import com.seenu.dev.android.lazypizza.domain.model.CartItemLite
+import com.seenu.dev.android.lazypizza.domain.model.OrderData
+import com.seenu.dev.android.lazypizza.domain.model.OrderInfo
 import com.seenu.dev.android.lazypizza.domain.model.Topping
 import com.seenu.dev.android.lazypizza.domain.model.ToppingWithCount
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +25,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
-class LocalCartRepository constructor(
+class CartRepositoryImpl constructor(
     database: LazyPizzaDatabase,
     val remoteCartDataSource: RemoteCartDataSource
 ) : LazyPizzaCartRepository {
@@ -247,6 +253,22 @@ class LocalCartRepository constructor(
             }
 
             remoteCartDataSource.removeItemFromCart(itemId)
+        }
+    }
+
+    override suspend fun checkout(data: OrderData): OrderInfo {
+        return withContext(Dispatchers.IO) {
+            val items = getCartItems()
+            val info = remoteCartDataSource.checkout(data.toDto(), items).toDomain()
+            clearCart()
+            info
+        }
+    }
+
+    override suspend fun getOrders(): List<OrderHistoryItem> {
+        return withContext(Dispatchers.IO) {
+            remoteCartDataSource.getOrders()
+                .map { it.toDomain() }
         }
     }
 

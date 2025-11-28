@@ -26,4 +26,8 @@ sealed interface Route {
             LIST
         }
     }
+
+    @Serializable
+    data object Checkout : Route
+
 }

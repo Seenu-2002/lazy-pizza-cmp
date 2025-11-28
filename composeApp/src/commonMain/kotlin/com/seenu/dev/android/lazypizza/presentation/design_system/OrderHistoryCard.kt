@@ -35,6 +35,7 @@ import com.seenu.dev.android.lazypizza.presentation.utils.getStringRes
 import com.seenu.dev.android.lazypizza.presentation.utils.roundTo2Digits
 import lazypizza.composeapp.generated.resources.Res
 import lazypizza.composeapp.generated.resources.count_and_price
+import lazypizza.composeapp.generated.resources.order_id
 import lazypizza.composeapp.generated.resources.total_amount
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -96,7 +97,7 @@ fun OrderHistoryCard(modifier: Modifier = Modifier, data: OrderHistoryUiModel) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.weight(1F)) {
                 Text(
-                    text = data.id,
+                    text = stringResource(Res.string.order_id, data.id),
                     style = MaterialTheme.typography.title3,
                     color = MaterialTheme.colorScheme.textPrimary
                 )

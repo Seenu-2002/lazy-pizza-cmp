@@ -76,10 +76,34 @@ val Typography.title4
         lineHeight = 16.sp
     )
 
+val Typography.label1Medium
+    @Composable get() = TextStyle(
+        fontFamily = InstrumentSans,
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp,
+        lineHeight = 20.sp
+    )
+
+val Typography.label1Semibold
+    @Composable get() = TextStyle(
+        fontFamily = InstrumentSans,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 14.sp,
+        lineHeight = 20.sp
+    )
+
 val Typography.label2Semibold
     @Composable get() = TextStyle(
         fontFamily = InstrumentSans,
         fontWeight = FontWeight.SemiBold,
+        fontSize = 12.sp,
+        lineHeight = 16.sp
+    )
+
+val Typography.label2Medium
+    @Composable get() = TextStyle(
+        fontFamily = InstrumentSans,
+        fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
         lineHeight = 16.sp
     )

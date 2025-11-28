@@ -4,12 +4,13 @@ import com.seenu.dev.android.lazypizza.LazyPizzaDatabase
 import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaCartRepository
 import com.seenu.dev.android.lazypizza.data.repository.LazyPizzaRepository
 import com.seenu.dev.android.lazypizza.domain.repository.FirebaseLazyPizzaRepository
-import com.seenu.dev.android.lazypizza.domain.repository.LocalCartRepository
+import com.seenu.dev.android.lazypizza.domain.repository.CartRepositoryImpl
 import com.seenu.dev.android.lazypizza.presentation.cart.PizzaCartViewModel
 import com.seenu.dev.android.lazypizza.LazyPizzaAppViewModel
 import com.seenu.dev.android.lazypizza.data.remote.RemoteCartDataSource
 import com.seenu.dev.android.lazypizza.data.repository.UserRepository
 import com.seenu.dev.android.lazypizza.domain.repository.UserRepositoryImpl
+import com.seenu.dev.android.lazypizza.presentation.checkout.OrderCheckoutViewModel
 import com.seenu.dev.android.lazypizza.presentation.history.OrderHistoryViewModel
 import com.seenu.dev.android.lazypizza.presentation.login.LoginViewModel
 import com.seenu.dev.android.lazypizza.presentation.pizza_detail.PizzaDetailViewModel
@@ -59,10 +60,11 @@ val lazyPizzaModule = module {
     viewModel { PizzaCartViewModel(get(), get()) }
     viewModel { LazyPizzaAppViewModel(get()) }
     viewModel { LoginViewModel(get(), get(), get()) }
-    viewModel { OrderHistoryViewModel() }
+    viewModel { OrderHistoryViewModel(get(), get()) }
+    viewModel { OrderCheckoutViewModel(get(), get()) }
     single<LazyPizzaDatabase> { LazyPizzaDatabase(get()) }
     single<LazyPizzaRepository> { FirebaseLazyPizzaRepository() }
-    single<LazyPizzaCartRepository> { LocalCartRepository(get(), get()) }
+    single<LazyPizzaCartRepository> { CartRepositoryImpl(get(), get()) }
     single<RemoteCartDataSource> { RemoteCartDataSource(get()) }
     single<UserRepository> { UserRepositoryImpl() }
 }

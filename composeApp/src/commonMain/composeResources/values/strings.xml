@@ -48,4 +48,29 @@
     <string name="error_otp">Incorrect code. Please try again</string>
     <string name="logout_success">User logged out successfully!</string>
 
+    <!--  Order Checkout screen  -->
+    <string name="order_checkout">Order Checkout</string>
+    <string name="pickup_time">Pickup Time</string>
+    <string name="earliest_available">Earliest available time</string>
+    <string name="schedule_time">Schedule time</string>
+    <string name="order_details">Order Details</string>
+    <string name="comments">Comments</string>
+    <string name="add_comment">Add Comment</string>
+    <string name="place_order">Place Order</string>
+    <string name="order_total">Order Total: </string>
+    <string name="select_time">Select Time</string>
+    <string name="select_date">Select Date</string>
+    <string name="pickup_available">Pickup available between %1$s and %2$s</string>
+    <string name="hour">Hour</string>
+    <string name="minute">Minute</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+
+    <!--  Order Confirmation screen  -->
+    <string name="order_placed_title">Your order has been placed!</string>
+    <string name="order_placed_msg">Thank you for your order! Please come at the indicated time.</string>
+    <string name="order_number">Order Number:</string>
+    <string name="pickup_time_with_colon">Pickup Time:</string>
+    <string name="order_id">Order #%1$s</string>
+
 </resources>
